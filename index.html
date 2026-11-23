@@ -544,7 +544,6 @@ function finishWorkout(){if(!db.active)return;if(!confirm('Training abschließen
 function discardWorkout(){if(confirm('Training wirklich verwerfen?')){db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
 function modal(html){let d=document.getElementById('modal');d.innerHTML=html;d.scrollTop=0;d.showModal();d.scrollTop=0;requestAnimationFrame(()=>{d.scrollTop=0;const first=d.querySelector('h2');if(first)first.scrollIntoView({block:'start',behavior:'instant'});d.scrollTop=0})}
 function closeModal(){document.getElementById('modal').close()}
-function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stacktrack-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function importData(input){let f=input.files[0];if(!f)return;try{let data=JSON.parse(await f.text());if(!Array.isArray(data.exercises)||!Array.isArray(data.plans)||!Array.isArray(data.history))throw Error('Ungültige Datei');if(confirm('Alle aktuellen Daten durch das Backup ersetzen?')){db=data;normalizeDb();save();render()}}catch(e){alert('Backup konnte nicht gelesen werden: '+e.message)}}
 /* ===== Rekorde ===== */
 const e1rmOf=(w,r)=>{w=+w||0;r=+r||0;return (w<=0||r<=0)?0:(r===1?w:w*(1+r/30))};
