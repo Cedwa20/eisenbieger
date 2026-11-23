@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0e0c12"><title>Eisenbieger DEV</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eisenbieger DEV"><meta name="application-name" content="Eisenbieger DEV">
+<style>
+:root{color-scheme:dark;--bg:#0e0c12;--panel:#2b2733;--panel2:#363042;--btn:#3d374a;--line:#17141c;--ink:#050408;--hl:#4b4559;--sh:#1b1822;--iron:#7d7a8c;--text:#e8e0cf;--muted:#9d96a9;--accent:#ff9a2e;--blood:#c0262f;--bone:#e6dcc3;--frame:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink);--bevel:inset 2px 2px 0 0 var(--hl),inset -2px -2px 0 0 var(--sh);--redbev:inset 2px 2px 0 0 #e2535b,inset -2px -2px 0 0 #6b1319;--goldfr:0 -2px 0 0 #8a5412,0 2px 0 0 #8a5412,-2px 0 0 0 #8a5412,2px 0 0 0 #8a5412,0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink)}
+*{box-sizing:border-box;image-rendering:pixelated}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:21px/1.12 'VT323','Courier New',monospace}
+h1,h2,h3{font-family:'Jacquard 12','Times New Roman',serif;font-weight:400;color:var(--bone)}
+h1{font-size:48px;line-height:48px;margin:0;text-shadow:3px 3px 0 #000}
+h2{font-size:32px;line-height:34px;margin:14px 0 8px}
+h3{font-size:28px;line-height:30px;margin:0 0 8px}
+p{margin:6px 0}
+b{font-weight:400;color:var(--bone)}
+small,.muted{color:var(--muted)}
+small{font-size:17px}
+.tiny{font-size:17px}
+header{position:relative;z-index:3;background:var(--bg)}
+header:has(.training-head){position:sticky;top:0;padding:10px 12px;background:var(--panel);box-shadow:inset 0 -4px 0 0 var(--ink),inset 0 -6px 0 0 var(--hl)}
+.brand{position:relative;height:100px;overflow:hidden;box-shadow:inset 0 -4px 0 0 var(--ink)}
+.brand svg.brk{position:absolute;left:0;top:0;width:100%;height:100%}
+.brand .glow{position:absolute;inset:0;background:radial-gradient(circle at 9% 45%,rgba(255,154,46,.42),transparent 42%),radial-gradient(circle at 91% 45%,rgba(255,154,46,.42),transparent 42%),linear-gradient(rgba(5,4,8,.25),rgba(5,4,8,.55))}
+.brand .torch{position:absolute;top:18px}.brand .torch.l{left:14px}.brand .torch.r{right:14px}
+.torch svg{display:block;animation:fl .8s steps(1) infinite}
+@keyframes fl{0%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){.torch svg{animation:none}}
+.brand .txt{position:absolute;left:0;right:0;top:8px;text-align:center}
+.brand small{display:block;color:#c9c0ac;text-shadow:2px 2px 0 #000;font-size:19px;margin-top:-2px}
+.recbar{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:38px;padding:3px 16px;background:#17141c;box-shadow:inset 0 -2px 0 0 var(--ink);color:var(--muted)}
+.recbar b{color:var(--accent)}
+main{max-width:740px;margin:auto;padding:16px 16px 110px}
+.card{position:relative;background:var(--panel);box-shadow:var(--frame),var(--bevel);padding:14px;margin:2px 2px 16px 2px}
+.card::before,.card::after{content:"";position:absolute;top:4px;width:4px;height:4px;background:var(--iron);pointer-events:none}
+.card::before{left:4px}.card::after{right:4px}
+.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.grow{flex:1;min-width:0}.card.row>button{flex:none}
+button,select,input{font:inherit;border-radius:0}
+button{border:0;margin:2px;background:var(--btn);color:var(--bone);padding:6px 14px 7px;cursor:pointer;box-shadow:var(--frame),var(--bevel);font-size:22px;line-height:22px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:active:not(:disabled){transform:translateY(2px);box-shadow:var(--frame),inset 2px 2px 0 0 var(--sh),inset -2px -2px 0 0 var(--hl)}
+button.primary{background:var(--blood);color:var(--bone);box-shadow:var(--frame),var(--redbev)}
+button.danger{color:#ff8b87}
+button:disabled{opacity:.4;cursor:default}
+input,select{background:#0e0c12;border:0;box-shadow:var(--frame),inset 2px 2px 0 0 #000;margin:2px;width:calc(100% - 4px);padding:8px 10px;color:var(--bone);font-size:24px;min-width:0}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--bone) 50%),linear-gradient(135deg,var(--bone) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;background-size:6px 6px;background-repeat:no-repeat;padding-right:30px}
+input::placeholder{color:#6b6577}
+label{display:block;margin:10px 0 5px;color:var(--muted)}
+nav{position:fixed;bottom:0;left:0;right:0;background:#0a080d;box-shadow:inset 0 4px 0 0 var(--ink),inset 0 6px 0 0 var(--panel);display:flex;justify-content:center;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav button{white-space:nowrap;box-shadow:none;background:none;margin:0;flex:1;min-width:0;max-width:170px;font-size:12px;line-height:14px;padding:14px 1px 8px;color:var(--muted);flex-direction:column;gap:5px}
+nav button:active:not(:disabled){transform:none;box-shadow:none}
+nav button svg{display:block}
+nav button.active{color:var(--accent)}
+.pill{display:inline-block;background:var(--panel);box-shadow:var(--frame),var(--bevel);margin:2px;padding:1px 9px 2px;font-size:18px;color:var(--bone)}
+.sets{display:grid;grid-template-columns:22px minmax(0,1.3fr) minmax(0,1.1fr) 44px;column-gap:8px;row-gap:0;align-items:center;margin:8px 0}
+.sets>button{margin:2px;padding:0;height:40px;width:auto}
+.sets>button:not(.done){background:#1b1822;box-shadow:var(--frame),inset 2px 2px 0 0 #0e0c12}
+.sets>small{text-align:center;font-size:22px}
+.done{background:var(--blood)!important;color:var(--bone)!important;box-shadow:var(--frame),var(--redbev)!important}
+.setlabels{display:grid;grid-template-columns:22px minmax(0,1.3fr) minmax(0,1.1fr) 44px;column-gap:8px;text-align:center;margin-top:12px}
+.setlabels small{font-size:16px}
+.stepper{display:flex;min-width:0;align-items:stretch}
+.stepper button{margin:2px;padding:0;width:28px;min-width:28px;font-size:26px;flex:none}
+.stepper input{margin:2px;width:auto;flex:1;min-width:0;padding:6px 0;text-align:center;font-size:28px;appearance:textfield}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.actions{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.empty{text-align:center;padding:26px;color:var(--muted)}
+.stat{font-family:'Jacquard 12','Times New Roman',serif;font-size:46px;line-height:46px;color:var(--bone)}
+.banner{background:#2b1519;box-shadow:0 -2px 0 0 var(--blood),0 2px 0 0 var(--blood),-2px 0 0 0 var(--blood),2px 0 0 0 var(--blood),0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink);padding:12px;margin:4px 4px 18px}
+dialog{background:var(--panel);color:var(--text);border:0;padding:16px;width:min(92vw,500px);max-height:85dvh;overflow-y:auto;overscroll-behavior:contain;box-shadow:var(--frame),var(--bevel),0 0 0 6px #000}
+dialog::backdrop{background:rgba(5,4,8,.82)}
+dialog form{margin:0}
+.hide{display:none}
+.training-head{display:grid;grid-template-columns:minmax(110px,1fr) minmax(150px,1.3fr);gap:10px;align-items:start}
+.training-controls .actions{margin-top:5px}
+.training-controls button{padding:3px 12px 4px;font-size:20px;line-height:20px}
+.timer-stack{display:flex;flex-direction:column;gap:6px}
+.timer-item{background:#1b1822;box-shadow:var(--frame),inset 2px 2px 0 0 #0e0c12;margin:2px;padding:4px 8px;font-size:19px}
+.timer-item b{font-size:24px;line-height:20px}
+.timer-name{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{position:relative;height:10px;background:#3a2a26;margin-top:4px;overflow:hidden}
+.track::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 2px),var(--ink) calc(10% - 2px),var(--ink) 10%)}
+.filterbar{display:flex;gap:4px;overflow-x:auto;padding:12px 2px}
+.filterbar button{white-space:nowrap;padding:3px 11px 4px}
+.filterbar .chosen{background:var(--accent);color:#1a0f02;box-shadow:var(--frame),inset 2px 2px 0 0 #ffc46b,inset -2px -2px 0 0 #a8590e}
+.workout-bottom button{padding:3px 9px;min-height:30px}
+.last-session{margin-top:12px;border-top:2px solid var(--line);padding-top:10px;color:var(--muted);font-size:18px;line-height:1.4}
+.last-history{margin-top:8px;display:grid;gap:6px}
+.last-history-head,.last-history-row{display:grid;grid-template-columns:23% 44% 33%;align-items:center;text-align:center}
+.last-history-head{color:var(--muted);font-size:16px}
+.last-history-row{background:#1b1822;box-shadow:var(--frame);margin:0 2px;padding:3px 4px;font-size:21px;color:var(--text)}
+.last-history-row span:first-child{color:var(--muted)}
+.thumb{flex:none;width:96px;background:#17141c;box-shadow:var(--frame),inset 2px 2px 0 0 #0e0c12;margin:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+.thumb.sm{width:72px}
+.thumb img{display:block;width:100%;height:auto}
+.thumb>svg{margin:10px}
+.bigimg img{display:block;width:288px;max-width:100%;height:auto;margin:6px auto 10px;background:#17141c;box-shadow:var(--frame)}
+.prline{display:flex;align-items:center;gap:8px;margin:6px 4px 10px;padding:4px 10px;background:#33200c;box-shadow:var(--goldfr);color:#ffc46b;font-size:20px}
+.prcard{background:#2a1c0e;box-shadow:var(--goldfr)}
+.prcard::before,.prcard::after{background:#8a5412}
+.prrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:2px solid var(--line);cursor:pointer;align-items:center}
+.prrow>span:first-child{color:var(--bone)}
+.prrow>span:last-child{text-align:right}
+.prgrid{display:grid;grid-template-columns:1fr 1.4fr;gap:6px 10px;margin:8px 0 10px;font-size:19px}
+.prgrid span:nth-child(odd){color:var(--muted)}
+.prtable{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;margin-top:6px;font-size:19px}
+.prtable span:nth-child(3n+3){color:var(--muted);text-align:right}
+details.card summary{cursor:pointer}
+.ic{display:inline-block;vertical-align:-3px}
+.quote{padding:10px 16px 12px;background:#120f17;box-shadow:inset 0 -2px 0 0 var(--ink);color:var(--bone);font-size:22px;line-height:1.1}.quote small{display:block;margin-top:4px;color:var(--accent);font-size:18px}
+.desc{margin:10px 0 4px;border-top:2px solid var(--line);padding-top:8px}.desc p{margin:8px 0;font-size:20px;line-height:1.2}.desc b{color:var(--accent)}
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jacquard+12&family=VT323&display=swap" rel="stylesheet"></head><body><header></header><main id="app"></main><nav id="nav"></nav><dialog id="modal" tabindex="-1"></dialog>
+<script>
+const CATS=['Brust / Bizeps','Rücken / Trizeps','Bauch / Beine'];
+const icons={'Brust':'','Bizeps':'','Rücken':'','Unterer Rücken':'','Trizeps':'','Bauch':'','Beine':'','Schultern':'','Sonstige':''};
+/* ---------- Übungskatalog: id, Name, Muskel, Gerät, Bildvorlage, Hilfsmittel im Bild, Gewichtsschritt, Standard-Wdh. ---------- */
+const CAT=[
+['bankdruecken','Bankdrücken','Brust','Langhantel + Bank','pressflat','bb',2.5],
+['kh_bd','Kurzhantel-Bankdrücken','Brust','Kurzhanteln + Bank','pressflat','db',2.5],
+['sbd_kh','Schrägbankdrücken (Kurzhanteln)','Brust','Kurzhanteln + Schrägbank','pressinc','db',2.5],
+['sbd_lh','Schrägbankdrücken (Langhantel)','Brust','Langhantel + Schrägbank','pressinc','bb',2.5],
+['neg_lh','Negativ-Bankdrücken (Langhantel)','Brust','Langhantel + Negativbank','pressdec','bb',2.5],
+['neg_kh','Negativ-Kurzhantelpresse','Brust','Kurzhanteln + Negativbank','pressdec','db',2.5],
+['fly','Kurzhantel-Fliegende','Brust','Kurzhanteln + Bank','flyflat','db',2.5],
+['sfly','Schrägbank-Fliegende','Brust','Kurzhanteln + Schrägbank','flyinc','db',2.5],
+['kfly','Kabel-Fliegende (stehend)','Brust','Kabelturm','cablefly','none',2.5],
+['kpress','Kabel-Brustpresse','Brust','Kabelturm','cablepress','none',2.5],
+['pullover','Kurzhantel-Pullover','Brust','Kurzhantel + Bank','pullover','db',2.5],
+['lieg','Liegestütze','Brust','Körpergewicht','pushup','none',2.5,12],
+['curl','Bizeps-Curls (Kurzhanteln)','Bizeps','Kurzhanteln','curl','db',2.5],
+['hammer','Hammer-Curls','Bizeps','Kurzhanteln','curl','db',2.5],
+['sz_curl','SZ-Stangen-Curls','Bizeps','SZ-Stange','curl','sz',2.5],
+['lh_curl','Langhantel-Curls','Bizeps','Langhantel','curl','bb',2.5],
+['konz','Konzentrations-Curls','Bizeps','Kurzhantel + Bank','curlconc','db',1.25],
+['inc_curl','Schrägbank-Curls','Bizeps','Kurzhanteln + Schrägbank','curlinc','db',2.5],
+['spider','Spider-Curls (SZ-Stange)','Bizeps','SZ-Stange + Schrägbank','curlspider','sz',2.5],
+['kcurl','Kabel-Curls','Bizeps','Kabelturm','curlcable','none',2.5],
+['tdruck','Trizepsdrücken (Kabel)','Trizeps','Kabelturm','pushdown','none',2.5],
+['french','French Press / Stirndrücken (SZ-Stange)','Trizeps','SZ-Stange + Bank','skull','sz',2.5],
+['overh','Überkopf-Trizepsstrecken (Kurzhantel)','Trizeps','Kurzhantel','overhead','db',2.5],
+['koverh','Überkopf-Trizeps am Kabel','Trizeps','Kabelturm','overheadcable','none',2.5],
+['eng_bd','Enges Bankdrücken (SZ-Stange)','Trizeps','SZ-Stange + Bank','pressflat','sz',2.5],
+['dips','Bank-Dips','Trizeps','Bank (Körpergewicht)','dips','none',2.5,12],
+['kick','Kickbacks (Kurzhantel)','Trizeps','Kurzhantel','kickback','db',1.25],
+['diamant','Diamant-Liegestütze','Trizeps','Körpergewicht','pushup','none',2.5,10],
+['latzug','Latzug','Rücken','Kabelturm','latpull','none',2.5],
+['krow','Rudern am Kabel (sitzend)','Rücken','Kabelturm','rowcable','none',2.5],
+['lhrow','Vorgebeugtes Rudern (Langhantel)','Rücken','Langhantel','rowbent','bb',2.5],
+['khrow','Einarmiges Kurzhantelrudern','Rücken','Kurzhantel + Bank','rowbench','db',1.25],
+['brow','Brustgestütztes Rudern (Schrägbank)','Rücken','Kurzhanteln + Schrägbank','chestrow','db',2.5],
+['kreuz','Kreuzheben','Rücken','Langhantel','deadlift','bb',2.5,8],
+['shrug','Shrugs (Schulterheben)','Rücken','Kurzhanteln','shrug','db',2.5],
+['geradarm','Kabel-Geradarmdrücken','Rücken','Kabelturm','straightarm','none',2.5],
+['hyper','Hyperextensions','Unterer Rücken','Rücken-/Bauchtrainer','hyper','none',2.5,12],
+['hyperw','Hyperextensions mit Gewicht','Unterer Rücken','Rückentrainer + Scheibe','hyper','plate',2.5,10],
+['goodm','Good Mornings (Langhantel)','Unterer Rücken','Langhantel','goodm','bb',2.5,10],
+['superm','Superman','Unterer Rücken','Matte','superm','none',2.5,12],
+['bird','Bird-Dog','Unterer Rücken','Matte','bird','none',2.5,10],
+['swing','Kettlebell-Swing','Unterer Rücken','Kettlebell','swing','kb',2,15],
+['revhyper','Reverse-Hyperextension','Unterer Rücken','Rücken-/Bauchtrainer','revhyper','none',2.5,12],
+['kniebeuge','Kniebeugen (Langhantel)','Beine','Langhantel','squat','bb',2.5],
+['multi','Beinpresse / Squats an Multipresse','Beine','Multipresse','squat','bb',2.5],
+['goblet','Goblet Squat (Kettlebell)','Beine','Kettlebell','goblet','kb',2],
+['khsquat','Kurzhantel-Kniebeugen','Beine','Kurzhanteln','dbsquat','db',2.5],
+['lunge','Ausfallschritte (Kurzhanteln)','Beine','Kurzhanteln','lunge','db',2.5],
+['bulg','Bulgarian Split Squat','Beine','Kurzhanteln + Bank','split','db',2.5],
+['stepup','Step-ups (Kurzhanteln)','Beine','Kurzhanteln + Bank','stepup','db',2.5],
+['calf','Wadenheben (Kurzhanteln)','Beine','Kurzhanteln','calf','db',2.5,15],
+['rdl','Rumänisches Kreuzheben (Langhantel)','Beine','Langhantel','rdl','bb',2.5],
+['slrdl','Einbeiniges Kreuzheben (Kettlebell)','Beine','Kettlebell','slrdl','kb',2],
+['hipt','Hip Thrust (Langhantel)','Beine','Langhantel + Bank','hipthrust','bb',2.5],
+['gluteb','Glute Bridge','Beine','Matte','glute','none',2.5,15],
+['pullth','Kabel-Pull-Through','Beine','Kabelturm','pullthrough','none',2.5],
+['ohp','Schulterdrücken (Kurzhanteln)','Schultern','Kurzhanteln','ohp','db',2.5],
+['mil','Military Press (Langhantel)','Schultern','Langhantel','ohp','bb',2.5],
+['front','Frontheben (SZ-Stange)','Schultern','SZ-Stange','frontraise','sz',2.5],
+['lat','Seitheben (Kurzhanteln)','Schultern','Kurzhanteln','lateral','db',1.25],
+['facepull','Face Pulls (Kabel)','Schultern','Kabelturm','facepull','none',2.5],
+['halo','Kettlebell Halo','Schultern','Kettlebell','halo','kb',2],
+['crunch','Crunches','Bauch','Matte','crunch','none',2.5,15],
+['sit','Sit-ups (Bauchtrainer)','Bauch','Rücken-/Bauchtrainer','situp','none',2.5,15],
+['legr','Beinheben liegend','Bauch','Matte','legraise','none',2.5,12],
+['revc','Reverse Crunches','Bauch','Matte','revcrunch','none',2.5,12],
+['plank','Plank (Wdh. = Sekunden)','Bauch','Matte','plank','none',2.5,30],
+['russ','Russian Twists (Kettlebell)','Bauch','Kettlebell + Matte','russ','kb',2,20],
+['kcrunch','Kabel-Crunch (kniend)','Bauch','Kabelturm','cablecrunch','none',2.5],
+['climb','Mountain Climbers','Bauch','Matte','climb','none',2.5,20],
+['dead','Dead Bug','Bauch','Matte','deadbug','none',2.5,10],
+['wood','Holzhacker (Kabel)','Bauch','Kabelturm','woodchop','none',2.5]
+];
+const catEx=()=>CAT.map(([id,name,muscle,equipment,fam,imp,step,reps])=>({id,name,muscle,equipment,fam,imp,step:step||2.5,...(reps?{reps}:{})}));
+const P=(id,name,category,exercises)=>({id,name,category,exercises});
+const seed=()=>({exercises:catEx(),plans:[
+P('p1','Plan A – Klassiker',CATS[0],['bankdruecken','sbd_kh','fly','sz_curl','curl','hammer','hyper','superm']),
+P('p2','Plan B – Schrägbank & Kabel',CATS[0],['sbd_lh','neg_lh','kfly','pullover','spider','konz','goodm','bird']),
+P('p3','Plan C – Kurzhantel & Kettlebell',CATS[0],['kh_bd','lieg','sfly','kpress','inc_curl','kcurl','swing','hyperw']),
+P('p4','Plan A – Kreuzheben & Zug',CATS[1],['kreuz','latzug','lhrow','facepull','tdruck','french','eng_bd','hyper']),
+P('p5','Plan B – Rudern & Dips',CATS[1],['rdl','khrow','krow','geradarm','overh','kick','dips','revhyper']),
+P('p6','Plan C – Kabel & Körpergewicht',CATS[1],['brow','latzug','shrug','koverh','diamant','dips','goodm','superm']),
+P('p7','Plan A – Beine & Rumpf',CATS[2],['goblet','lunge','hipt','calf','crunch','legr','hyper','swing']),
+P('p8','Plan B – Split Squat & Core',CATS[2],['bulg','rdl','stepup','sit','plank','russ','goodm','revhyper']),
+P('p9','Plan C – Kabel & Stabilität',CATS[2],['khsquat','slrdl','pullth','kcrunch','dead','wood','bird','superm'])
+],history:[],active:null,rest:90});
+/* ---------- Bildvorlagen: Pose a = Start, Pose b = Gegenposition. Werte: Kopf,Schulter,Hüfte,Ellbogen,Hand,Knie,Fuß[,Knie2,Fuß2] ---------- */
+const STAND='80,13,80,24,80,46,82,38,83,52,80,66,80,92';
+const HINGE_UP='80,13,80,24,80,46,82,38,83,52,80,66,80,92';
+const FAM={
+pressflat:{eq:'flat',a:'44,62,56,64,92,64,57,48,56,32,110,50,114,88',b:'44,62,56,64,92,64,62,68,56,56,110,50,114,88'},
+pressinc:{eq:'inc',a:'40,42,50,50,84,68,52,36,51,20,106,58,110,88',b:'40,42,50,50,84,68,58,56,52,40,106,58,110,88'},
+pressdec:{eq:'dec',a:'38,64,50,60,88,48,52,46,52,30,104,56,112,46',b:'38,64,50,60,88,48,60,60,52,48,104,56,112,46'},
+flyflat:{eq:'flat',a:'44,62,56,64,92,64,59,48,56,34,110,50,114,88',b:'44,62,56,64,92,64,62,68,72,72,110,50,114,88'},
+flyinc:{eq:'inc',a:'40,42,50,50,84,68,52,36,51,20,106,58,110,88',b:'40,42,50,50,84,68,60,56,68,60,106,58,110,88'},
+pullover:{eq:'flat',a:'44,62,56,64,92,64,57,48,56,32,110,50,114,88',b:'44,62,56,64,92,64,44,56,30,66,110,50,114,88'},
+cablefly:{cab:[118,-6],a:'80,13,80,24,80,46,86,36,98,40,80,66,80,92',b:'80,13,80,24,80,46,78,34,66,30,80,66,80,92'},
+cablepress:{cab:[40,26],a:'80,13,80,24,80,46,74,40,86,36,80,66,80,92',b:'80,13,80,24,80,46,90,34,104,34,80,66,80,92'},
+pushup:{a:'30,56,42,60,86,74,42,76,42,90,108,82,128,90',b:'30,74,42,78,86,84,56,84,42,90,108,88,128,90'},
+curl:{a:STAND,b:'80,13,80,24,80,46,86,38,95,27,80,66,80,92'},
+curlinc:{eq:'inc2',a:'48,28,56,40,70,64,58,56,60,70,94,66,96,92',b:'48,28,56,40,70,64,64,54,74,44,94,66,96,92'},
+curlconc:{eq:'seat',a:'86,36,76,42,62,64,84,58,86,74,94,62,96,92',b:'86,36,76,42,62,64,84,58,92,44,94,62,96,92'},
+curlspider:{eq:'spider',a:'96,40,88,46,60,70,92,62,92,76,50,84,40,92',b:'96,40,88,46,60,70,92,62,98,48,50,84,40,92'},
+pushdown:{cab:[92,-6],a:'80,13,80,24,80,46,84,38,92,30,80,66,80,92',b:'80,13,80,24,80,46,84,38,88,54,80,66,80,92'},
+skull:{eq:'flat',a:'44,62,56,64,92,64,57,48,44,50,110,50,114,88',b:'44,62,56,64,92,64,57,48,58,32,110,50,114,88'},
+overhead:{a:'80,13,80,24,80,46,82,8,74,16,80,66,80,92',b:'80,13,80,24,80,46,82,8,82,-8,80,66,80,92'},
+kickback:{a:'52,34,62,34,90,48,76,38,78,54,88,68,86,92',b:'52,34,62,34,90,48,76,38,92,40,88,68,86,92'},
+dips:{eq:'dipb',a:'62,34,62,44,80,60,56,58,58,70,104,72,124,90',b:'62,48,62,58,80,72,52,64,58,70,104,78,124,90'},
+latpull:{cab:[94,-8],eq:'lat',a:'72,34,76,46,80,70,84,26,92,8,100,64,104,92',b:'72,34,74,46,80,70,66,58,78,42,100,64,104,92'},
+rowcable:{cab:[145,70],a:'68,46,70,58,72,82,88,62,106,64,98,76,120,68',b:'66,46,68,58,72,82,56,64,76,62,98,76,120,68'},
+rowbent:{a:'48,36,58,38,86,50,60,54,60,70,88,70,86,92',b:'48,36,58,38,86,50,74,42,66,54,88,70,86,92'},
+rowbench:{eq:'rowb',a:'48,36,58,38,86,50,60,54,60,70,88,70,86,92',b:'48,36,58,38,86,50,74,42,66,54,88,70,86,92'},
+chestrow:{eq:'spider',a:'96,40,88,46,60,70,90,62,90,76,50,84,40,92',b:'96,40,88,46,60,70,78,52,90,60,50,84,40,92'},
+deadlift:{a:'92,36,82,42,68,58,83,58,82,80,86,72,80,92',b:'79,13,78,24,80,46,80,38,80,54,80,66,80,92'},
+shrug:{a:STAND,b:'80,9,80,19,80,46,82,34,83,50,80,66,80,92'},
+straightarm:{cab:[100,-6],a:'80,13,80,24,80,46,90,16,98,4,80,66,80,92',b:'80,13,80,24,80,46,84,40,86,54,80,66,80,92'},
+hyper:{eq:'hyper',a:'58,90,66,82,90,64,70,84,66,86,108,72,124,82',b:'60,48,70,53,90,64,74,60,68,54,108,72,124,82'},
+goodm:{a:'80,13,80,24,80,46,76,34,77,23,80,66,80,92',b:'104,53,94,54,70,50,90,50,94,52,76,68,80,92'},
+superm:{eq:'mat',a:'30,82,42,84,84,84,32,86,20,86,104,84,126,84',b:'30,70,42,76,84,84,30,76,16,70,104,78,126,72'},
+bird:{eq:'mat',a:'42,56,50,60,90,62,50,72,50,86,90,80,100,86',b:'42,56,50,60,90,62,38,60,24,58,108,62,126,62'},
+swing:{a:'100,50,90,52,66,56,88,62,82,74,82,70,80,92',b:'80,13,80,24,80,46,92,26,106,28,80,66,80,92'},
+revhyper:{eq:'revh',a:'40,68,50,66,72,70,48,78,46,88,80,82,84,92',b:'40,68,50,66,72,70,48,78,46,88,96,70,120,70'},
+squat:{a:'80,13,80,24,80,46,76,34,77,23,80,66,80,92',b:'76,42,72,52,66,72,70,60,72,50,86,70,80,92'},
+goblet:{a:'80,13,80,24,80,46,86,36,90,28,80,66,80,92',b:'78,42,74,52,66,72,86,62,92,54,86,70,80,92'},
+dbsquat:{a:STAND,b:'76,42,72,52,66,72,74,64,76,78,86,70,80,92'},
+lunge:{a:STAND,b:'76,32,76,44,76,64,78,56,78,70,104,66,106,92,56,82,44,92'},
+split:{eq:'bbench',a:'86,22,86,34,86,56,88,48,88,62,100,72,104,92,66,68,44,70',b:'86,34,86,46,86,70,88,60,88,74,110,72,104,92,66,76,44,72'},
+stepup:{eq:'stepbox',a:'84,30,84,42,86,62,86,54,86,68,104,60,112,70,86,78,86,92',b:'112,1,112,12,112,32,112,24,112,38,112,50,112,70,118,40,116,56'},
+calf:{a:STAND,b:'80,7,80,18,80,40,82,32,83,46,80,60,80,86'},
+rdl:{a:'100,54,90,56,66,50,91,70,90,84,74,68,78,92',b:'79,13,78,24,80,46,80,38,80,54,80,66,80,92'},
+slrdl:{a:STAND+',80,68,78,86',b:'104,50,94,56,72,56,96,68,96,82,76,68,80,92,52,54,32,52'},
+hipthrust:{eq:'htbench',a:'40,66,50,66,76,86,62,76,76,86,98,70,108,92',b:'40,66,50,66,76,66,63,66,76,66,98,66,108,92'},
+glute:{eq:'mat',a:'38,84,48,86,76,86,60,87,72,87,98,68,108,88',b:'38,84,48,86,76,68,60,86,72,86,98,66,108,88'},
+pullthrough:{cab:[20,88],a:'100,54,90,56,66,50,88,70,78,76,76,68,78,92',b:'80,13,80,24,80,46,82,38,84,52,80,66,80,92'},
+ohp:{a:'80,13,80,24,80,46,78,36,82,24,80,66,80,92',b:'80,13,80,24,80,46,82,8,81,-8,80,66,80,92'},
+frontraise:{a:STAND,b:'80,13,80,24,80,46,94,26,108,24,80,66,80,92'},
+lateral:{mir:1,a:'80,13,80,24,80,46,88,38,90,52,76,66,74,92',b:'80,13,80,24,80,46,98,28,112,26,76,66,74,92'},
+facepull:{cab:[132,18],a:'80,13,80,24,80,46,94,26,108,24,80,66,80,92',b:'80,13,80,24,80,46,90,18,94,12,80,66,80,92'},
+halo:{a:'80,13,80,24,80,46,86,34,88,24,80,66,80,92',b:'80,13,80,24,80,46,76,30,76,12,80,66,80,92'},
+crunch:{eq:'mat',a:'34,84,46,86,80,86,40,78,34,82,96,70,106,88',b:'48,72,58,76,80,86,44,68,40,74,96,70,106,88'},
+situp:{eq:'wedge',a:'38,80,50,82,84,86,42,74,38,80,102,70,110,88',b:'82,52,76,62,84,86,86,56,84,50,102,70,110,88'},
+legraise:{eq:'mat',a:'34,84,46,86,80,86,58,87,70,87,104,86,128,86',b:'34,84,46,86,80,86,58,87,70,87,80,64,80,42'},
+revcrunch:{eq:'mat',a:'34,84,46,86,80,86,58,87,70,87,92,68,104,72',b:'34,84,46,86,76,76,58,87,70,87,90,60,102,56'},
+plank:{eq:'mat',a:'36,64,46,66,88,72,46,86,62,86,108,80,128,86',b:'36,63,46,65,88,70,46,86,62,86,108,79,128,86'},
+russ:{eq:'mat',a:'54,52,60,62,76,84,74,68,88,66,100,68,118,76',b:'54,52,60,62,76,84,68,70,72,76,100,68,118,76'},
+cablecrunch:{cab:[100,-8],a:'82,38,80,50,78,66,88,40,90,30,88,84,66,88',b:'98,72,90,64,78,64,94,70,96,64,88,84,66,88'},
+climb:{a:'32,58,42,62,88,68,42,76,42,90,108,76,128,90',b:'32,58,42,62,88,68,42,76,42,90,66,70,72,84'},
+deadbug:{eq:'mat',a:'36,86,46,86,80,86,46,72,46,58,80,66,100,66',b:'36,86,46,86,80,86,36,86,24,86,104,86,128,86'},
+woodchop:{cab:[130,-6],a:'80,13,80,24,80,46,92,14,98,2,80,66,80,92',b:'80,13,80,24,80,46,80,44,70,60,80,66,80,92'}
+};
+FAM.curlcable={...FAM.curl,cab:[130,90]};
+FAM.overheadcable={...FAM.overhead,cab:[30,84]};
+const SG='stroke="#7d7a8c" stroke-width="3" stroke-linecap="round" fill="none"';
+const EQ={
+mat:'<rect x="12" y="88" width="136" height="5" rx="2" fill="#35303f"/>',
+flat:`<rect x="34" y="70" width="88" height="5" rx="2" fill="#7d7a8c"/><path d="M42 75V92M114 75V92" ${SG}/>`,
+inc:`<path d="M34 42L82 70" ${SG} stroke-width="5"/><path d="M82 72H118M86 74V92M114 74V92" ${SG}/>`,
+inc2:`<path d="M44 26L66 62" ${SG} stroke-width="5"/><path d="M64 68H100M68 70V92M96 70V92" ${SG}/>`,
+dec:`<path d="M32 72L92 54" ${SG} stroke-width="5"/><path d="M36 74V92M92 56V92" ${SG}/>`,
+seat:`<path d="M40 70H102M46 72V92M96 72V92" ${SG} stroke-width="4"/>`,
+lat:`<path d="M62 74H108M70 76V92M100 76V92" ${SG} stroke-width="4"/>`,
+spider:`<path d="M52 80L90 52" ${SG} stroke-width="5"/><path d="M56 82V92M88 54V92" ${SG}/>`,
+hyper:`<path d="M84 64L98 70" ${SG} stroke-width="6"/><path d="M92 70V92M108 80V92" ${SG}/><circle cx="118" cy="84" r="4" fill="#7d7a8c"/>`,
+revh:`<path d="M34 74H78M42 76V92M72 76V92" ${SG} stroke-width="5"/>`,
+htbench:`<path d="M22 73H64M30 75V92M56 75V92" ${SG} stroke-width="5"/>`,
+dipb:`<path d="M22 72H62M28 74V92M56 74V92" ${SG} stroke-width="4"/>`,
+rowb:`<path d="M18 72H62M24 74V92M56 74V92" ${SG} stroke-width="4"/><path d="M58 38L44 72" ${SG} stroke-width="2.5"/>`,
+bbench:`<path d="M24 74H58M30 76V92M52 76V92" ${SG} stroke-width="4"/>`,
+stepbox:'<rect x="96" y="70" width="44" height="22" rx="3" fill="#35303f" stroke="#7d7a8c"/>',
+wedge:'<path d="M30 92V82L104 90V92Z" fill="#35303f"/>'
+};
+function impl(t,x,y){
+ const f='fill="#aeb2bd" stroke="#5a5668" stroke-width="1.6"';
+ if(t==='bb')return `<circle cx="${x}" cy="${y}" r="8" ${f}/>`;
+ if(t==='sz')return `<circle cx="${x}" cy="${y}" r="6" ${f}/>`;
+ if(t==='plate')return `<circle cx="${x}" cy="${y}" r="7" ${f}/>`;
+ if(t==='db')return `<rect x="${x-6}" y="${y-3}" width="12" height="6" rx="2" ${f}/>`;
+ if(t==='kb')return `<circle cx="${x}" cy="${y+6}" r="6.5" ${f}/><path d="M${x-4} ${y+2}a4 4 0 0 1 8 0" fill="none" stroke="#5a5668" stroke-width="1.6"/>`;
+ return '';
+}
+let pxMode=false;
+function drawFig(n,imp,mir,op){
+ const [hx,hy,sx,sy,px,py,ex,ey,wx,wy,kx,ky,ax,ay,k2x,k2y,a2x,a2y]=n;
+ const L=p=>'M'+p.map(q=>q.join(' ')).join('L'),m=q=>[160-q[0],q[1]];
+ const arm=[[sx,sy],[ex,ey],[wx,wy]],leg=[[px,py],[kx,ky],[ax,ay]];
+ let d=[L([[sx,sy],[px,py]]),L(arm),L(leg)];
+ if(k2x!=null)d.push(L([[px,py],[k2x,k2y],[a2x,a2y]]));
+ if(mir){d.push(L(arm.map(m)),L(leg.map(m)))}
+ let s=`<g opacity="${op}" style="color:#e6dcc3"><path d="${d.join('')}" fill="none" stroke="currentColor" stroke-width="${pxMode?6.6:3.4}" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${hx}" cy="${hy}" r="${pxMode?7.5:6}" fill="#17141c" stroke="currentColor" stroke-width="${pxMode?4.5:3}"/>`;
+ s+=impl(imp,wx,wy);if(mir)s+=impl(imp,160-wx,wy);
+ return s+'</g>';
+}
+const svgCache={};
+/* ===== Kerker-Design: Pixel-Symbole, Kopfzeile, Pixel-Übungsbilder ===== */
+const PXS=(w,h,d,sc=2,extra='')=>`<svg class="ic" width="${w*sc}" height="${h*sc}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true" ${extra}><path style="fill:currentColor" d="${d}"/></svg>`;
+const ICONS={
+home:PXS(11,10,"M4 0h1v1h-1zM3 1h3v1h-3zM2 2h5v1h-5zM1 3h7v1h-7zM0 4h9v1h-9zM1 5h7v1h-7zM1 6h2v1h-2zM6 6h2v1h-2zM1 7h2v1h-2zM6 7h2v1h-2z"),
+plans:PXS(11,11,"M0 1h2v1h-2zM3 1h8v1h-8zM0 2h2v1h-2zM3 2h8v1h-8zM0 5h2v1h-2zM3 5h8v1h-8zM0 6h2v1h-2zM3 6h8v1h-8zM0 9h2v1h-2zM3 9h8v1h-8zM0 10h2v1h-2zM3 10h8v1h-8z"),
+library:PXS(11,9,"M4 0h3v1h-3zM3 1h5v1h-5zM2 2h2v1h-2zM5 2h1v1h-1zM7 2h2v1h-2zM1 3h2v1h-2zM5 3h1v1h-1zM8 3h2v1h-2zM0 4h2v1h-2zM4 4h3v1h-3zM9 4h2v1h-2zM1 5h2v1h-2zM5 5h1v1h-1zM8 5h2v1h-2zM2 6h2v1h-2zM5 6h1v1h-1zM7 6h2v1h-2zM3 7h5v1h-5zM4 8h3v1h-3z"),
+stats:PXS(11,11,"M9 0h2v1h-2zM9 1h2v1h-2zM9 2h2v1h-2zM5 3h2v1h-2zM9 3h2v1h-2zM5 4h2v1h-2zM9 4h2v1h-2zM5 5h2v1h-2zM9 5h2v1h-2zM1 6h2v1h-2zM5 6h2v1h-2zM9 6h2v1h-2zM1 7h2v1h-2zM5 7h2v1h-2zM9 7h2v1h-2zM1 8h2v1h-2zM5 8h2v1h-2zM9 8h2v1h-2zM0 9h11v1h-11z"),
+settings:PXS(11,11,"M4 0h3v1h-3zM2 1h1v1h-1zM5 1h1v1h-1zM8 1h1v1h-1zM1 2h9v1h-9zM2 3h7v1h-7zM0 4h1v1h-1zM2 4h7v1h-7zM10 4h1v1h-1zM0 5h11v1h-11zM0 6h1v1h-1zM2 6h7v1h-7zM10 6h1v1h-1zM2 7h7v1h-7zM1 8h9v1h-9zM2 9h1v1h-1zM5 9h1v1h-1zM8 9h1v1h-1zM4 10h3v1h-3z"),
+workout:`<svg class="ic" width="16" height="20" viewBox="0 0 8 10" shape-rendering="crispEdges" aria-hidden="true"><path style="fill:#ff8a1e" d="M3 0h1v1h-1zM2 1h2v1h-2zM2 2h3v1h-3zM6 2h1v1h-1zM1 3h3v1h-3zM5 3h2v1h-2zM1 4h2v1h-2zM6 4h1v1h-1zM0 5h2v1h-2zM6 5h2v1h-2zM0 6h2v1h-2zM6 6h2v1h-2zM1 7h1v1h-1zM6 7h1v1h-1zM2 8h1v1h-1zM5 8h1v1h-1zM3 9h2v1h-2z"/><path style="fill:#ffe066" d="M4 3h1v1h-1zM3 4h3v1h-3zM2 5h4v1h-4zM2 6h4v1h-4zM2 7h4v1h-4zM3 8h2v1h-2z"/></svg>`,
+stat:PXS(11,11,"M9 0h2v1h-2zM9 1h2v1h-2zM9 2h2v1h-2zM5 3h2v1h-2zM9 3h2v1h-2zM5 4h2v1h-2zM9 4h2v1h-2zM5 5h2v1h-2zM9 5h2v1h-2zM1 6h2v1h-2zM5 6h2v1h-2zM9 6h2v1h-2zM1 7h2v1h-2zM5 7h2v1h-2zM9 7h2v1h-2zM1 8h2v1h-2zM5 8h2v1h-2zM9 8h2v1h-2zM0 9h11v1h-11z",1.6),
+up:PXS(7,4,"M3 0h1v1h-1zM2 1h3v1h-3zM1 2h5v1h-5zM0 3h7v1h-7z"),
+down:PXS(7,4,"M0 0h7v1h-7zM1 1h5v1h-5zM2 2h3v1h-3zM3 3h1v1h-1z"),
+x:PXS(7,7,"M0 0h1v1h-1zM6 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM2 2h1v1h-1zM4 2h1v1h-1zM3 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1z",2),
+pen:PXS(7,7,"M5 0h2v1h-2zM4 1h3v1h-3zM3 2h3v1h-3zM2 3h3v1h-3zM1 4h3v1h-3zM0 5h3v1h-3zM0 6h1v1h-1z",2)
+};
+const CHK=PXS(7,6,"M6 0h1v1h-1zM5 1h2v1h-2zM0 2h1v1h-1zM4 2h2v1h-2zM0 3h2v1h-2zM3 3h2v1h-2zM1 4h3v1h-3zM2 5h1v1h-1z",3);
+const TRD="M0 0h9v1h-9zM0 1h1v1h-1zM2 1h5v1h-5zM8 1h1v1h-1zM0 2h1v1h-1zM2 2h5v1h-5zM8 2h1v1h-1zM1 3h7v1h-7zM2 4h5v1h-5zM3 5h3v1h-3zM4 6h1v1h-1zM3 7h3v1h-3zM2 8h5v1h-5z";
+const TR=PXS(9,9,TRD,2),TRS=PXS(9,9,TRD,1.5);
+const SKULL=`<svg class="ic" width="32" height="28" viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true"><path style="fill:#e6dcc3" d="M4 1h8v1h-8zM2 2h12v1h-12zM1 3h14v1h-14zM1 4h14v1h-14zM1 5h3v1h-3zM6 5h4v1h-4zM12 5h3v1h-3zM1 6h2v1h-2zM7 6h2v1h-2zM13 6h2v1h-2zM1 7h2v1h-2zM7 7h2v1h-2zM13 7h2v1h-2zM1 8h3v1h-3zM6 8h4v1h-4zM12 8h3v1h-3zM2 9h5v1h-5zM9 9h5v1h-5zM3 10h10v1h-10zM3 11h1v1h-1zM5 11h1v1h-1zM7 11h2v1h-2zM10 11h1v1h-1zM12 11h1v1h-1z"/></svg>`;
+const TORCH=`<svg width="32" height="60" viewBox="0 0 8 15" shape-rendering="crispEdges" aria-hidden="true"><path style="fill:#ff8a1e" d="M3 0h1v1h-1zM2 1h2v1h-2zM2 2h3v1h-3zM6 2h1v1h-1zM1 3h3v1h-3zM5 3h2v1h-2zM1 4h2v1h-2zM6 4h1v1h-1zM0 5h2v1h-2zM6 5h2v1h-2zM0 6h2v1h-2zM6 6h2v1h-2zM1 7h1v1h-1zM6 7h1v1h-1zM2 8h1v1h-1zM5 8h1v1h-1z"/><path style="fill:#ffe066" d="M4 3h1v1h-1zM3 4h3v1h-3zM2 5h4v1h-4zM2 6h4v1h-4zM2 7h4v1h-4zM3 8h2v1h-2z"/><path style="fill:#6b4423" d="M3 9h2v1h-2zM3 10h2v1h-2zM3 11h2v1h-2zM3 12h2v1h-2zM2 13h4v1h-4zM2 14h4v1h-4z"/></svg>`;
+const BRICK=`<svg class="brk" shape-rendering="crispEdges" aria-hidden="true"><defs><pattern id="brk" width="32" height="32" patternUnits="userSpaceOnUse"><rect width="32" height="32" style="fill:#2b2733"/><rect width="32" height="2" style="fill:#17141c"/><rect y="16" width="32" height="2" style="fill:#17141c"/><rect width="2" height="16" style="fill:#17141c"/><rect x="16" y="16" width="2" height="16" style="fill:#17141c"/><rect x="2" y="2" width="28" height="2" style="fill:#363042"/><rect x="18" y="18" width="14" height="2" style="fill:#363042"/><rect x="0" y="18" width="14" height="2" style="fill:#363042"/></pattern></defs><rect width="100%" height="100%" fill="url(#brk)"/></svg>`;
+const BLANK='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const QUOTES=['Wir machen den Sport nicht, weil wir gesund werden wollen, sondern weil wir Muskeln wollen.','Schweres Gewicht, hohes Volumen – Muskelwachstum!','Es gibt keinen Grund, Übungen permanent zu ändern.','Wir machen immer noch Bodybuilding, weil wir es gerne machen.','Weil ich\u2019s kann!','Wer scheiß Arme hat, sieht scheiße aus.','Wenn du Scheiße frisst, wirst du halt scheiße aussehen.'];
+function dailyQuote(){if(!QUOTES.length)return '';const d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);return '<div class="quote"><div>\u201E'+esc(QUOTES[n%QUOTES.length])+'\u201C</div><small>\u2013 Markus R\u00FChl</small></div>'}
+function brandHeader(){return `<div class="brand">${BRICK}<div class="glow"></div><div class="torch l">${TORCH}</div><div class="torch r">${TORCH}</div><div class="txt"><h1>Eisenbieger</h1><small>Dein Trainings-Tracker</small></div></div><div class="recbar"><span>Heutige Empfehlung: <b>${esc(recommendedCategory())}</b></span><span class="pill">Bereit</span></div>${tab==='home'?dailyQuote():''}`}
+/* Übungsbilder: Vektor-Skizze -> kleines Raster -> harte Pixel in Kerker-Farben */
+const PXPAL=[[230,220,195],[125,122,140],[174,178,189],[90,86,104],[53,48,66],[23,20,28]];
+const pxCache={},pxPending={};
+const pxKey=(e,big)=>e.id+(big?'B':'S');
+function pxUrl(e,big){const k=pxKey(e,big);if(pxCache[k])return pxCache[k];if(!pxPending[k]){pxPending[k]=1;pixelize(e,big).then(u=>{pxCache[k]=u;document.querySelectorAll('img[data-px="'+k+'"]').forEach(i=>{i.src=u})}).catch(()=>{pxPending[k]=0})}return ''}
+async function rasterLayer(svg,w,h){const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);return x.getImageData(0,0,w,h).data}finally{URL.revokeObjectURL(url)}}
+async function pixelize(e,big){
+ const w=big?96:48,h=big?68:34;
+ const [eq,gh,ac]=await Promise.all([rasterLayer(exSvg(e,'eq'),w,h),rasterLayer(exSvg(e,'ghost'),w,h),rasterLayer(exSvg(e,'act'),w,h)]);
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const out=x.createImageData(w,h),o=out.data;
+ const put=(i,r,g,b,dim)=>{let best=0,bd=1e9;for(let k=0;k<PXPAL.length;k++){const q=PXPAL[k],d=(r-q[0])**2+(g-q[1])**2+(b-q[2])**2;if(d<bd){bd=d;best=k}}const q=PXPAL[best],m=dim?0.5:1;o[i]=q[0]*m;o[i+1]=q[1]*m;o[i+2]=q[2]*m;o[i+3]=255};
+ for(let i=0;i<o.length;i+=4){if(eq[i+3]>=115)put(i,eq[i],eq[i+1],eq[i+2],false);if(gh[i+3]>=90)put(i,gh[i],gh[i+1],gh[i+2],true);if(ac[i+3]>=100)put(i,ac[i],ac[i+1],ac[i+2],false)}
+ x.putImageData(out,0,0);return c.toDataURL('image/png')}
+function exSvg(e,layer){
+ if(!e||!FAM[e.fam])return '';
+ const key=e.id+'|'+e.fam+'|'+e.imp+'|'+(layer||'');if(svgCache[key])return svgCache[key];
+ const f=FAM[e.fam],a=f.a.split(',').map(Number),b=f.b.split(',').map(Number),px=!!layer;
+ pxMode=px;
+ let eq='<line x1="6" y1="93" x2="154" y2="93" stroke="#35303f" stroke-width="'+(px?3:1.5)+'"/>'+(EQ[f.eq]||'');
+ if(px)eq=eq.replace(/stroke-width="[^"]*"([^>]*?)stroke-width="([^"]*)"/g,'$1 stroke-width="$2"');
+ if(px)eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.9).toFixed(1)+'"');
+ if(f.cab){const[cx,cy]=f.cab;eq+=`<path d="M${cx} ${cy}L${a[8]} ${a[9]}" stroke="#7d7a8c" stroke-width="${px?2.6:1.4}" stroke-dasharray="${px?'7 4':'3 2'}" fill="none"/><circle cx="${cx}" cy="${cy}" r="${px?5:3.5}" fill="#7d7a8c"/>`}
+ const gh=drawFig(b,e.imp,f.mir,px?1:.32),ac=drawFig(a,e.imp,f.mir,1);
+ pxMode=false;
+ const wrap=c=>'<svg class="exsvg" viewBox="0 -12 160 112" width="160" height="112" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+esc(e.name)+'">'+c+'</svg>';
+ const out=layer==='eq'?wrap(eq):layer==='ghost'?wrap(gh):layer==='act'?wrap(ac):wrap(eq+gh+ac);
+ return svgCache[key]=out;
+}
+const DESC={"bankdruecken": "Flach auf der Bank, Füße fest am Boden, Schulterblätter zusammen und leicht nach unten ziehen, Hantel etwas breiter als schulterbreit greifen.|Stange kontrolliert zur unteren Brust senken, Unterarme bleiben senkrecht. Ohne Prellen kraftvoll nach oben drücken, bis die Arme fast gestreckt sind.|Gesäß, Schultern und Kopf bleiben auf der Bank, kein starkes Hohlkreuz. Bei schweren Sätzen immer mit Sicherheitsablage oder Partner arbeiten.", "kh_bd": "Kurzhanteln auf die Oberschenkel legen, mit Schwung in Position kippen. Rücken flach auf der Bank, Schulterblätter zusammen, Hanteln über der Brust.|Hanteln kontrolliert bis auf Brusthöhe senken, Ellbogen etwa 45–60° vom Körper. Dann in leichtem Bogen nach oben drücken, bis sich die Hanteln fast berühren.|Der größere Bewegungsradius dehnt die Brust stärker als die Langhantel. Nicht oben die Ellbogen hart durchdrücken.", "sbd_kh": "Bank auf etwa 30° stellen (nicht steiler, sonst übernehmen die Schultern). Hanteln über der oberen Brust, Schulterblätter zusammen.|Hanteln senken, bis die Ellbogen etwa auf Brusthöhe sind, dann kraftvoll hochdrücken.|Fokus liegt auf der oberen Brust. Zu steile Bank belastet vor allem die Schultern.", "sbd_lh": "Schrägbank auf etwa 30° einstellen, Füße fest am Boden, Stange etwas breiter als schulterbreit greifen.|Stange zur oberen Brust (unter dem Schlüsselbein) senken und gerade nach oben drücken.|Nicht zu steil einstellen. Sicherheit beachten und bei schweren Gewichten Ablage oder Partner nutzen.", "neg_lh": "Auf der Negativbank (Kopf unten) gut fixieren, Stange etwas breiter als schulterbreit greifen und aus der Ablage heben.|Stange zur unteren Brust senken und wieder hochdrücken. Der Bewegungsweg ist kurz.|Belastet vor allem die untere Brust. Wegen des Blutdrucks im Kopf mit moderatem Gewicht und nicht zu langen Sätzen arbeiten. Immer sichern.", "neg_kh": "Auf der Negativbank liegen, Hanteln mit geradem Handgelenk über der unteren Brust halten.|Hanteln kontrolliert senken, Ellbogen leicht angewinkelt. Dann nach oben drücken, bis sich die Arme fast strecken.|Gut geeignet, um die untere Brust zu treffen. Gewicht so wählen, dass du die Hanteln jederzeit sicher kontrollierst.", "fly": "Flach auf der Bank, Hanteln mit leicht gebeugten Armen über der Brust, Handflächen zeigen zueinander.|Arme in einem weiten Bogen seitlich absenken, bis du eine deutliche Dehnung in der Brust spürst. Dann den Bogen rückwärts nachzeichnen, als würdest du jemanden umarmen.|Ellbogenwinkel während der ganzen Bewegung konstant halten. Zu schwer gewählt wird daraus ein Drücken. Nicht tiefer als Schulterhöhe.", "sfly": "Schrägbank auf etwa 30°, Hanteln über der oberen Brust, Arme leicht gebeugt.|Hanteln im Bogen seitlich absenken, bis die Brust gedehnt ist, dann im selben Bogen wieder zusammenführen.|Leichte bis mittlere Gewichte und langsam arbeiten. Schultern bleiben unten und hinten.", "kfly": "Kabel auf Schulter- oder Brusthöhe, Stand leicht versetzt, Oberkörper leicht nach vorn geneigt, Griffe mit leicht gebeugten Armen halten.|Arme in weitem Bogen vor der Brust zusammenführen, als würdest du einen Baum umarmen. Kurz halten und kontrolliert öffnen.|Rumpf stabil halten und nicht mit Schwung arbeiten. Gleichmäßige Spannung ist der Vorteil des Kabels.", "kpress": "Kabel auf Brusthöhe, Stand versetzt, Griffe an der Brust, Oberkörper leicht nach vorn.|Griffe nach vorn drücken, bis die Arme fast gestreckt sind, Hände dürfen sich vorn leicht annähern. Langsam zurückkehren.|Bauch anspannen und nicht ins Hohlkreuz fallen. Gleichmäßiges Tempo, keine Wucht.", "pullover": "Quer oder längs auf der Bank, eine Hantel mit beiden Händen über der Brust halten, Arme leicht gebeugt.|Hantel in einem Bogen hinter den Kopf absenken, bis du Dehnung in Brust und Rücken spürst. Dann im Bogen zurück über die Brust ziehen.|Rippen unten halten, nicht ins Hohlkreuz kippen. Mit moderatem Gewicht arbeiten, die Schultern werden stark gedehnt.", "lieg": "Hände etwas mehr als schulterbreit, Körper bildet eine gerade Linie von Kopf bis Fuß, Bauch und Gesäß angespannt.|Brust kontrolliert Richtung Boden senken, Ellbogen etwa 45° vom Körper. Kraftvoll hochdrücken, ohne die Linie zu verlieren.|Nicht durchhängen oder das Gesäß hochschieben. Zu schwer? Knie auf den Boden. Zu leicht? Füße erhöhen.", "curl": "Aufrecht stehen, Kurzhanteln seitlich, Handflächen zeigen nach vorn, Ellbogen am Körper.|Hanteln nach oben curlen, bis der Bizeps maximal angespannt ist, oben kurz halten und langsam wieder absenken.|Ellbogen bleiben vorn am Körper, kein Schwung aus dem Rücken. Unten die Arme fast ganz strecken.", "hammer": "Aufrecht stehen, Hanteln seitlich mit neutralem Griff (Daumen zeigen nach oben).|Hanteln wie einen Hammer nach oben führen, Ellbogen bleiben am Körper, dann langsam senken.|Trainiert zusätzlich den Oberarmmuskel und Unterarm. Kein Schwung und kein Mitnehmen der Schultern.", "sz_curl": "Aufrecht stehen, SZ-Stange im Untergriff an den schrägen Griffflächen halten, Ellbogen am Körper.|Stange nach oben curlen, kurz halten und kontrolliert absenken.|Die Stangenform schont die Handgelenke. Ellbogen vorn halten und den Rücken nicht ins Hohlkreuz ziehen.", "lh_curl": "Schulterbreiter Untergriff an der Langhantel, aufrecht stehen, Ellbogen am Körper.|Stange im Bogen zur Brust curlen, oben anspannen und langsam wieder senken.|Gesäß, Rücken und Knie bleiben still. Wenn du schwingen musst, ist das Gewicht zu hoch.", "konz": "Sitzend auf der Bank, Beine breit, Oberarm von innen gegen den Oberschenkel gestützt, Hantel hängt frei.|Hantel nach oben zur Schulter curlen, oben kräftig anspannen, dann langsam absenken.|Der gestützte Arm verhindert Schwung und isoliert den Bizeps. Mit leichten Gewichten und sauberer Technik arbeiten.", "inc_curl": "Schrägbank auf etwa 45–60°, zurücklehnen, Arme hängen hinter der Körperlinie nach unten.|Hanteln nach oben curlen, ohne die Oberarme nach vorn zu bewegen, oben anspannen und langsam wieder absenken.|Starke Dehnung des langen Bizepskopfes. Leichtere Gewichte als beim normalen Curl wählen.", "spider": "Bauch nach unten auf eine Schrägbank legen, Arme hängen senkrecht nach unten, SZ-Stange im Untergriff.|Stange nach oben curlen, oben fest anspannen, langsam wieder absenken.|Der Rücken der Bank verhindert Schwung. Die Oberarme bleiben senkrecht, das ist die Kernbewegung der Übung.", "kcurl": "Am unteren Kabel mit Stange oder Seil, aufrecht stehen, Ellbogen am Körper.|Griff nach oben curlen, oben kurz halten und gegen den Widerstand langsam absenken.|Das Kabel gibt auch unten Spannung. Nicht ins Hohlkreuz lehnen und die Ellbogen nicht nach vorn schieben.", "tdruck": "Aufrecht am hohen Kabel stehen, Stange oder Seil auf Brusthöhe, Ellbogen eng am Körper.|Griff nach unten drücken, bis die Arme gestreckt sind, kurz anspannen und kontrolliert zurückkommen lassen.|Nur die Unterarme bewegen, die Ellbogen bleiben fest am Körper. Schultern unten, Rumpf stabil.", "french": "Flach auf der Bank, SZ-Stange mit schulterbreitem Griff über der Brust halten, Arme senkrecht.|Nur die Unterarme beugen und die Stange kontrolliert zur Stirn oder knapp dahinter absenken, dann wieder strecken.|Ellbogen zeigen zur Decke und bleiben schulterbreit. Bei Ellbogenproblemen leichteres Gewicht oder Kurzhanteln nutzen.", "overh": "Aufrecht oder sitzend, eine Kurzhantel mit beiden Händen über dem Kopf halten, Arme gestreckt.|Hantel hinter dem Kopf absenken, indem du nur die Ellbogen beugst, dann wieder nach oben strecken.|Ellbogen zeigen nach vorn und bleiben eng. Bauch anspannen, kein Hohlkreuz. Starke Dehnung des langen Trizepskopfes.", "koverh": "Mit dem Rücken zum Kabelturm, Seil in beiden Händen hinter dem Kopf, leichter Ausfallschritt.|Seil nach vorn oben strecken, bis die Arme gestreckt sind, dann kontrolliert zurückkehren.|Oberarme bleiben fest und zeigen nach vorn. Rumpf stabil halten.", "eng_bd": "Flach auf der Bank, SZ-Stange mit etwa schulterbreitem Griff halten, Ellbogen nah am Körper.|Stange kontrolliert zur unteren Brust senken und kraftvoll hochdrücken, Ellbogen bleiben eng.|Nicht zu eng greifen, das belastet die Handgelenke. Schultern und Gesäß bleiben fest auf der Bank.", "dips": "Auf einer Bank abstützen, Hände neben dem Gesäß, Beine ausgestreckt oder gebeugt.|Gesäß nah an der Bank absenken, bis die Ellbogen etwa 90° erreichen, dann wieder hochdrücken.|Ellbogen zeigen nach hinten, Schultern bleiben unten. Nicht zu tief, falls die Schulter schmerzt. Zusatzgewicht erst, wenn die Technik sitzt.", "kick": "Vorgebeugt mit geradem Rücken, Oberarm parallel zum Körper, Hantel in der Hand, Ellbogen 90°.|Unterarm nach hinten strecken, bis der Arm gestreckt ist, oben fest anspannen und langsam zurück.|Oberarm bleibt fixiert, kein Schwung. Leichtes Gewicht mit sauberer Spannung.", "diamant": "Liegestützposition, Hände eng unter der Brust, Daumen und Zeigefinger bilden eine Raute.|Brust zu den Händen senken und hochdrücken, Ellbogen bleiben nah am Körper.|Körper bleibt eine gerade Linie. Bei Handgelenkschmerzen Hände etwas breiter oder Knie am Boden.", "latzug": "Sitzen, Oberschenkel unter der Polsterung, Stange weiter als schulterbreit greifen, Oberkörper leicht zurück.|Stange zur oberen Brust ziehen und dabei die Ellbogen nach unten führen, Schulterblätter zusammen. Langsam wieder hochlassen.|Nicht mit dem Körper schwingen. Die Zugbewegung kommt aus dem Rücken, nicht aus den Armen. Stange nicht hinter den Nacken ziehen.", "krow": "Sitzend am Kabel, Füße abgestützt, Rücken gerade, Griff vor dem Körper halten.|Griff zum Bauch ziehen und die Schulterblätter zusammenführen, kurz halten und langsam wieder vorlassen.|Rücken bleibt gerade und aufrecht. Kein Schwung aus dem Oberkörper. Die Ellbogen bleiben nah am Körper.", "lhrow": "Stand etwa hüftbreit, Oberkörper stark nach vorn gebeugt (etwa 45°), Rücken gerade, Langhantel mit Obergriff hängend.|Stange zum Bauchnabel ziehen und die Schulterblätter zusammenführen, dann kontrolliert absenken.|Rücken bleibt neutral, kein Rundrücken und kein Hochkommen mit dem Oberkörper. Mit moderatem Gewicht starten, der untere Rücken arbeitet mit.", "khrow": "Mit einer Hand und einem Knie auf der Bank abstützen, Rücken gerade, Hantel hängt unten.|Hantel zur Hüfte ziehen, Ellbogen eng am Körper, oben kurz anspannen und kontrolliert absenken.|Schultern bleiben waagerecht, keine Rotation des Oberkörpers. Rücken gerade halten.", "brow": "Bauch nach unten auf der Schrägbank, Brust am Polster, Hanteln hängen nach unten.|Hanteln zu den Rippen ziehen, Schulterblätter zusammen, dann kontrolliert absenken.|Die Bank stützt den Rücken und verhindert Schwung. Nicht den Kopf überstrecken.", "kreuz": "Stand hüftbreit, Stange über Mitte der Füße, Rücken gerade, Brust raus, Griff knapp außerhalb der Beine.|Mit Druck durch die Fersen aufrichten, Stange nah am Körper führen, oben Hüfte und Knie strecken. Kontrolliert wieder ablegen.|Rücken bleibt immer neutral, kein Rundrücken. Mit leichtem Gewicht Technik lernen. Hohe Belastung für den unteren Rücken, daher sauber arbeiten.", "shrug": "Aufrecht stehen, Kurzhanteln seitlich, Arme gestreckt.|Schultern gerade nach oben Richtung Ohren ziehen, kurz halten und langsam wieder senken.|Keine Kreisbewegung, kein Schwung. Kopf bleibt neutral.", "geradarm": "Am hohen Kabel stehen, leicht nach vorn gebeugt, Arme fast gestreckt, Stange oder Seil greifen.|Arme gestreckt in einem Bogen nach unten zu den Oberschenkeln ziehen, kurz anspannen und langsam wieder nach oben lassen.|Arme bleiben gestreckt, die Kraft kommt aus dem Latissimus. Rücken gerade.", "hyper": "Hyperextension-Gerät einstellen, Hüfte knapp über dem Polster, Füße fixiert, Körper bildet eine gerade Linie.|Oberkörper kontrolliert nach unten senken und wieder anheben, bis du eine gerade Linie erreichst.|Nicht überstrecken und kein Schwung. Gesäß und unterer Rücken arbeiten gemeinsam, Bewegung langsam ausführen.", "hyperw": "Wie bei den Hyperextensions, zusätzlich eine Scheibe vor der Brust halten.|Oberkörper kontrolliert senken und bis zur geraden Linie wieder anheben.|Mit leichtem Gewicht starten, Rücken gerade halten, nicht überstrecken.", "goodm": "Stange locker im Nacken, Stand etwa schulterbreit, Knie leicht gebeugt.|Hüfte nach hinten schieben und den Oberkörper mit geradem Rücken nach vorn kippen, bis du Dehnung in der Beinrückseite spürst. Dann mit der Hüfte wieder aufrichten.|Sehr leichtes Gewicht, der untere Rücken ist stark belastet. Rücken immer gerade halten, nicht rund werden.", "superm": "Bauchlage auf der Matte, Arme nach vorn ausgestreckt.|Arme und Beine gleichzeitig leicht vom Boden heben, kurz halten, dann ruhig absenken.|Nicht in den Nacken überstrecken, Blick Richtung Boden. Kontrolliert und ohne Schwung.", "bird": "Vierfüßlerstand, Hände unter den Schultern, Knie unter der Hüfte, Rücken gerade.|Gegengleichen Arm und Bein gleichzeitig strecken, bis sie eine Linie mit dem Rücken bilden. Kurz halten und zurückführen, dann Seite wechseln.|Hüfte bleibt ruhig und waagerecht, kein Hohlkreuz. Langsam und kontrolliert.", "swing": "Stand breiter als hüftbreit, Kettlebell vor dir auf dem Boden, Rücken gerade.|Kettlebell zwischen die Beine zurückschwingen, dann Hüfte kraftvoll strecken, sodass sie bis auf Brusthöhe schwingt. Wieder zurückfallen lassen.|Die Kraft kommt aus der Hüfte, nicht aus den Armen. Rücken immer gerade, oben nicht ins Hohlkreuz.", "revhyper": "Bauch nach unten auf dem Gerät oder einer Bank, Hüfte am Rand, Beine hängen nach unten.|Beine gestreckt bis zur Höhe des Oberkörpers anheben, kurz halten und langsam senken.|Kein Schwung, nur bis zur geraden Linie. Gesäß und unterer Rücken arbeiten.", "kniebeuge": "Stange auf dem oberen Rücken, Stand etwa schulterbreit, Fußspitzen leicht nach außen, Rumpf angespannt.|Hüfte nach hinten und unten schieben, bis die Oberschenkel mindestens parallel zum Boden sind. Mit Druck durch die gesamte Fußsohle wieder aufrichten.|Rücken gerade, Knie folgen den Fußspitzen und fallen nicht nach innen. Bei schwerem Gewicht Safety-Stangen nutzen.", "multi": "Stand auf der Multipresse etwas vor dem Körper, Stange auf dem oberen Rücken.|Hüfte nach unten schieben, bis die Oberschenkel parallel sind, dann kraftvoll hochdrücken.|Die Führung nimmt Gleichgewicht ab. Füße etwas weiter vorn halten, damit die Knie nicht zu weit nach vorn gehen.", "goblet": "Kettlebell am Henkel vor der Brust halten, Stand etwa schulterbreit, Ellbogen eng.|Tief in die Hocke gehen, Ellbogen zwischen den Knien, Rücken gerade, dann wieder aufrichten.|Brust bleibt oben und der Rumpf aufrecht. Gut zum Erlernen der Kniebeuge geeignet.", "khsquat": "Kurzhanteln seitlich oder an den Schultern halten, Stand schulterbreit.|Hüfte nach hinten und unten schieben bis mindestens parallel, dann aufrichten.|Rücken gerade und Rumpf angespannt. Knie bleiben in Linie mit den Füßen.", "lunge": "Aufrecht stehen, Kurzhanteln seitlich, großen Schritt nach vorn.|Hinteres Knie Richtung Boden senken, bis beide Knie etwa 90° erreichen, dann mit dem vorderen Bein wieder hochdrücken.|Oberkörper aufrecht, vorderes Knie nicht nach innen kippen. Schritt lang genug, damit das Knie nicht weit über die Zehen geht.", "bulg": "Hinteren Fuß auf der Bank ablegen, Kurzhanteln seitlich, vorderer Fuß etwa einen Schritt entfernt.|Hinteres Knie senken, bis der vordere Oberschenkel parallel ist, dann hochdrücken.|Gewicht auf dem vorderen Bein, Oberkörper leicht nach vorn geneigt. Stand so wählen, dass das Knie nicht weit nach vorn geht.", "stepup": "Vor eine stabile Bank oder Box stellen, Kurzhanteln seitlich.|Mit einem Fuß hochsteigen, bis du oben gerade stehst, kontrolliert wieder absenken. Dann Seite wechseln.|Kraft kommt aus dem oberen Bein, nicht aus dem Abdruck des unteren. Bank sicher wählen.", "calf": "Aufrecht stehen, Kurzhanteln seitlich, Fußballen auf einer Stufe oder flach am Boden.|Fersen hoch auf die Zehenspitzen drücken, oben kurz halten und langsam wieder senken.|Volle Bewegung nutzen, kein Schwung. Auf einer Stufe ist die Dehnung größer.", "rdl": "Stand hüftbreit, Langhantel vor den Oberschenkeln mit Obergriff, Knie leicht gebeugt, Rücken gerade.|Hüfte nach hinten schieben und die Stange nah am Körper entlang absenken, bis du Dehnung in der Beinrückseite spürst. Mit der Hüfte wieder aufrichten.|Rücken bleibt neutral, die Bewegung kommt aus der Hüfte. Stange immer am Körper führen.", "slrdl": "Auf einem Bein stehen, Kettlebell in der Hand, Standbein leicht gebeugt.|Oberkörper nach vorn kippen, das freie Bein nach hinten strecken, bis Oberkörper und Bein eine Linie bilden. Dann wieder aufrichten.|Hüfte bleibt waagerecht und der Rücken gerade. Langsam und kontrolliert arbeiten, schult auch das Gleichgewicht.", "hipt": "Oberer Rücken an der Bank, Langhantel über der Hüfte (Polster nutzen), Füße etwa hüftbreit.|Hüfte kräftig nach oben strecken, bis Oberschenkel und Rumpf eine Linie bilden. Kurz anspannen und kontrolliert senken.|Kinn leicht zur Brust, kein Hohlkreuz. Kraft kommt aus dem Gesäß.", "gluteb": "Rückenlage auf der Matte, Knie gebeugt, Füße hüftbreit aufgestellt.|Hüfte nach oben drücken, bis Oberschenkel und Rumpf eine Linie bilden, oben anspannen und senken.|Kein Hohlkreuz. Zum Steigern Gewicht auf die Hüfte legen.", "pullth": "Mit dem Rücken zum Kabel, Seil zwischen den Beinen greifen, Hüfte gebeugt.|Hüfte kraftvoll nach vorn strecken, bis du aufrecht stehst. Dann kontrolliert zurückbeugen.|Rücken gerade halten. Die Kraft kommt aus der Hüfte, nicht aus den Armen.", "ohp": "Aufrecht stehen oder sitzen, Kurzhanteln auf Schulterhöhe, Rumpf angespannt.|Hanteln nach oben über den Kopf drücken, bis die Arme fast gestreckt sind, dann kontrolliert absenken.|Kein Hohlkreuz. Bauch und Gesäß anspannen. Hanteln leicht nach innen führen.", "mil": "Stange auf Schulterhöhe vor der Brust, Stand schulterbreit, Rumpf angespannt.|Stange gerade nach oben drücken, dabei den Kopf kurz zurückziehen, oben Arme strecken. Kontrolliert wieder absenken.|Gesäß und Bauch fest, kein Hohlkreuz. Nicht mit den Beinen anschieben (außer bei Push-Press).", "front": "Aufrecht stehen, SZ-Stange mit Obergriff vor den Oberschenkeln halten.|Stange mit nahezu gestreckten Armen bis auf Schulter- oder Augenhöhe heben, kurz halten und langsam senken.|Kein Schwung aus dem Rücken. Rumpf angespannt und Schultern unten.", "lat": "Aufrecht stehen, leicht vorgeneigt, Kurzhanteln seitlich, Ellbogen leicht gebeugt.|Arme seitlich bis auf Schulterhöhe anheben, oben kurz halten, dann langsam senken.|Nicht höher als Schulterhöhe und ohne Schwung. Kleine Hanteln, saubere Ausführung.", "facepull": "Kabel auf Gesichtshöhe, Seil greifen, ein Stück zurücktreten, Arme gestreckt.|Seil zum Gesicht ziehen, Ellbogen hoch und nach außen, Schulterblätter zusammen. Kurz halten und langsam wieder vorlassen.|Schulter- und Haltungsübung für die hintere Schulter. Leichtes Gewicht und saubere Technik.", "halo": "Aufrecht stehen, Kettlebell mit beiden Händen vor der Brust am Henkel halten (auf dem Kopf stehend).|Kettlebell in einem Kreis um den Kopf führen, nah am Körper, dann Richtung wechseln.|Rumpf angespannt, Rippen unten. Kreis eng halten, Schultern entspannen.", "crunch": "Rückenlage auf der Matte, Knie gebeugt, Hände seitlich am Kopf, Ellbogen offen.|Oberkörper aufrollen, bis die Schulterblätter vom Boden sind, kurz anspannen und kontrolliert absenken.|Nicht am Nacken ziehen. Der Bauch macht die Arbeit, Kinn bleibt leicht abgehoben.", "sit": "Auf dem Bauchtrainer sitzen, Füße fixiert, Hände an der Brust oder am Kopf.|Oberkörper kontrolliert aufrichten und langsam wieder absenken.|Rücken rund halten statt gestreckt hochzuschwingen, sonst wird der Hüftbeuger überlastet. Nicht am Nacken ziehen.", "legr": "Rückenlage, Hände unter dem Gesäß oder seitlich, Beine gestreckt.|Beine gestreckt oder leicht gebeugt anheben, bis sie senkrecht stehen, dann langsam wieder absenken, ohne den Boden zu berühren.|Unterer Rücken bleibt am Boden. Wenn er abhebt, die Beine gebeugt lassen.", "revc": "Rückenlage, Knie angewinkelt, Beine in der Luft.|Becken mit Kraft aus dem Unterbauch vom Boden abrollen, kurz halten und kontrolliert absenken.|Nicht mit Schwung arbeiten. Kurze, saubere Bewegung.", "plank": "Unterarmstütz, Ellbogen unter den Schultern, Körper bildet eine gerade Linie.|Position halten und dabei Bauch, Gesäß und Oberschenkel anspannen. Die Wiederholungszahl entspricht den Sekunden.|Nicht ins Hohlkreuz fallen und das Gesäß nicht hochschieben. Gleichmäßig weiteratmen.", "russ": "Auf der Matte sitzen, Oberkörper leicht zurück, Füße angehoben oder am Boden, Kettlebell vor der Brust.|Oberkörper abwechselnd zu beiden Seiten drehen und die Kettlebell neben der Hüfte absetzen oder führen.|Rücken gerade halten, die Drehung kommt aus dem Rumpf, nicht nur aus den Armen.", "kcrunch": "Kniend vor dem hohen Kabel, Seil am Kopf halten, Hüfte aufrecht.|Oberkörper nach unten rollen und die Ellenbogen Richtung Knie ziehen, oben kurz anspannen, dann langsam zurück.|Bewegung kommt aus dem Bauch, nicht aus der Hüfte oder den Armen. Nicht zu schwer wählen.", "climb": "Liegestützposition, Hände unter den Schultern, Körper gerade.|Abwechselnd ein Knie schnell Richtung Brust ziehen und zurückführen, wie beim Laufen im Stütz.|Gesäß unten halten, Rumpf angespannt. Tempo steigern, wenn die Technik sitzt.", "dead": "Rückenlage, Arme zur Decke gestreckt, Hüfte und Knie 90° gebeugt.|Gegengleichen Arm und Bein langsam Richtung Boden senken, ohne dass der Rücken abhebt, dann zurückführen und wechseln.|Unterer Rücken bleibt am Boden. Langsam und kontrolliert, gleichmäßig atmen.", "wood": "Seitlich zum Kabelturm, Griff hoch am Kabel mit beiden Händen halten, Stand schulterbreit.|Kabel in einer Diagonale von oben außen nach unten innen ziehen, Rumpf dreht mit, Arme bleiben fast gestreckt.|Die Drehung kommt aus dem Rumpf, Füße bleiben stabil. Kontrolliert zurückführen."};
+const dTxt=id=>{const t=DESC[id];if(!t)return '';const p=t.split('|');const L=['Start','Ausführung','Tipp'];return '<div class="desc">'+p.map((x,i)=>'<p><b>'+(L[i]||'')+':</b> '+esc(x)+'</p>').join('')+'</div>'};
+
+/* ===== Bewegungs-Animation: Zwischenposen zwischen Start und Gegenposition ===== */
+const animCache={};let animTimer=null,animToken=0;
+function frameSvg(e,t,layer){
+ const f=FAM[e.fam],a=f.a.split(',').map(Number),b=f.b.split(',').map(Number),n=a.map((v,i)=>v+(b[i]-v)*t);
+ pxMode=true;
+ let eq='<line x1="6" y1="93" x2="154" y2="93" stroke="#35303f" stroke-width="3"/>'+(EQ[f.eq]||'');
+ eq=eq.replace(/stroke-width="[^"]*"([^>]*?)stroke-width="([^"]*)"/g,'$1 stroke-width="$2"');
+ eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.9).toFixed(1)+'"');
+ if(f.cab){const[cx,cy]=f.cab;eq+=`<path d="M${cx} ${cy}L${n[8]} ${n[9]}" stroke="#7d7a8c" stroke-width="2.6" stroke-dasharray="7 4" fill="none"/><circle cx="${cx}" cy="${cy}" r="5" fill="#7d7a8c"/>`}
+ const ac=drawFig(n,e.imp,f.mir,1);pxMode=false;
+ const wrap=c=>'<svg viewBox="0 -12 160 112" width="160" height="112" xmlns="http://www.w3.org/2000/svg">'+c+'</svg>';
+ return layer==='eq'?wrap(eq):wrap(ac);
+}
+async function pixelFrame(e,t){
+ const w=96,h=68;
+ const [eq,ac]=await Promise.all([rasterLayer(frameSvg(e,t,'eq'),w,h),rasterLayer(frameSvg(e,t,'act'),w,h)]);
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const out=x.createImageData(w,h),o=out.data;
+ const put=(i,r,g,b)=>{let best=0,bd=1e9;for(let k=0;k<PXPAL.length;k++){const q=PXPAL[k],d=(r-q[0])**2+(g-q[1])**2+(b-q[2])**2;if(d<bd){bd=d;best=k}}const q=PXPAL[best];o[i]=q[0];o[i+1]=q[1];o[i+2]=q[2];o[i+3]=255};
+ for(let i=0;i<o.length;i+=4){if(eq[i+3]>=115)put(i,eq[i],eq[i+1],eq[i+2]);if(ac[i+3]>=100)put(i,ac[i],ac[i+1],ac[i+2])}
+ x.putImageData(out,0,0);return c.toDataURL('image/png')}
+function stopAnim(){animToken++;if(animTimer){clearInterval(animTimer);animTimer=null}}
+async function startAnim(e){
+ stopAnim();const tok=animToken;
+ if(!e||!FAM[e.fam]||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ try{
+  if(!animCache[e.id])animCache[e.id]=await Promise.all([0,.2,.4,.6,.8,1].map(t=>pixelFrame(e,t)));
+  if(tok!==animToken)return;
+  const fr=animCache[e.id],seq=[0,1,2,3,4,5,5,5,4,3,2,1,0,0];let i=0;
+  const el=document.getElementById('animImg');if(!el)return;
+  el.src=fr[0];
+  animTimer=setInterval(()=>{const img=document.getElementById('animImg');if(!img||!document.getElementById('modal').open){stopAnim();return}i=(i+1)%seq.length;img.src=fr[seq[i]]},170);
+ }catch(err){console.info('Animation nicht verfügbar',err)}
+}
+document.getElementById('modal').addEventListener('close',()=>{if(!document.getElementById('modal').open)stopAnim()});
+function thumb(id,sm){
+ const e=ex(id);if(!e)return '';
+ if(!FAM[e.fam])return `<div class="thumb ${sm?'sm':''}">${SKULL}</div>`;
+ const k=pxKey(e,0);
+ return `<div class="thumb ${sm?'sm':''}" onclick="showImg('${id}')"><img data-px="${k}" alt="${esc(e.name)}" src="${pxUrl(e,0)||BLANK}"></div>`;
+}
+function showImg(id){const e=ex(id);if(!e)return;const img=FAM[e.fam]?`<img id="animImg" data-px="${pxKey(e,1)}" alt="${esc(e.name)}" src="${pxUrl(e,1)||BLANK}">`:'';modal(`<h2>${esc(e.name)}</h2><div class="bigimg">${img}</div><p class="muted tiny">${esc(e.muscle)} · ${esc(e.equipment)}<br>Das Bild zeigt den Bewegungsablauf von der Start- zur Endposition. Die Skizzen dienen der Orientierung.</p>${dTxt(id)}<p>${btn('Schließen','closeModal()')}</p>`);startAnim(e)}
+function exOptions(){const g={};db.exercises.forEach(e=>(g[e.muscle]??=[]).push(e));return Object.keys(g).map(m=>`<optgroup label="${esc(m)}">${g[m].map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</optgroup>`).join('')}
+function syncCatalog(){for(const c of catEx()){let e=db.exercises.find(x=>x.id===c.id);if(!e)db.exercises.push(c);else{e.fam??=c.fam;e.imp??=c.imp}}}
+let db;try{db=JSON.parse(localStorage.getItem('eisenbiegerDevelopmentV1'))||seed()}catch{db=seed()}
+try{localStorage.removeItem('meinGymDemoV7')}catch{}
+let tab='home',filter='',category=CATS[0],timer=null, muscleFilter='Alle';
+function normalizeDb(){db.exercises??=[];syncCatalog();db.plans??=[];db.history??=[];db.rest=Number.isFinite(+db.rest)?+db.rest:90;db.backup??={at:null,count:0,snooze:0};db.exercises.forEach(e=>{if(!e.step)e.step=2.5});if(db.active){db.active.timers??=[];db.active.pausedMs??=0;db.active.lastActivityAt=Number.isFinite(+db.active.lastActivityAt)&&+db.active.lastActivityAt>0?+db.active.lastActivityAt:new Date(db.active.started).getTime()||Date.now()}}
+normalizeDb();
+
+let saveWarned=false;
+const save=()=>{try{localStorage.setItem('eisenbiegerDevelopmentV1',JSON.stringify(db))}catch{if(!saveWarned){saveWarned=true;alert('Speichern fehlgeschlagen. Bitte Daten exportieren.')}}};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ex=id=>db.exercises.find(x=>x.id===id);
+const fmt=d=>new Date(d).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+const latest=id=>{for(let i=db.history.length-1;i>=0;i--){let e=db.history[i].exercises.find(x=>x.id===id&&x.sets.some(s=>s.done));if(e)return e}return null};
+const btn=(text,fn,cls='')=>`<button class="${cls}" onclick="${fn}">${text}</button>`;
+const IDLE_LIMIT_MS=60*60*1000;
+let screenWakeLock=null;
+let wakeLockPending=false;
+async function keepScreenAwake(){
+ if(!db.active || document.visibilityState!=='visible' || screenWakeLock || wakeLockPending)return;
+ if(!('wakeLock' in navigator))return;
+ wakeLockPending=true;
+ try{
+  const lock=await navigator.wakeLock.request('screen');
+  screenWakeLock=lock;
+  lock.addEventListener('release',()=>{if(screenWakeLock===lock)screenWakeLock=null});
+ }catch(err){console.info('Bildschirm-Wachhaltung nicht verfügbar:',err.message)}
+ finally{wakeLockPending=false}
+}
+async function releaseScreenWakeLock(){
+ const lock=screenWakeLock;screenWakeLock=null;
+ if(lock)try{await lock.release()}catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible' && db.active)keepScreenAwake();
+});
+function recommendedCategory(){
+ const latestByCategory=new Map(CATS.map(c=>[c,0]));
+ for(const w of db.history){
+  const cat=db.plans.find(p=>p.id===w.planId)?.category;
+  if(cat && latestByCategory.has(cat)){
+   const ts=new Date(w.ended).getTime();
+   if(Number.isFinite(ts))latestByCategory.set(cat,Math.max(latestByCategory.get(cat),ts));
+  }
+ }
+ return CATS.reduce((old,c)=>latestByCategory.get(c)<latestByCategory.get(old)?c:old,CATS[0]);
+}
+function recommendationLabel(){return `<div class="tiny" style="margin-top:5px;color:#a8dbc7">Heutige Empfehlung: <b>${esc(recommendedCategory())}</b></div>`}
+function registerActivity(){
+ if(!db.active)return;
+ keepScreenAwake();
+ const now=Date.now();
+ if(checkInactivity(now))return;
+ // Only actual interaction resets the 60-minute inactivity period.
+ db.active.lastActivityAt=now;
+ save();
+}
+function checkInactivity(now=Date.now()){
+ const w=db.active;
+ if(!w)return false;
+ const last=Number(w.lastActivityAt)||new Date(w.started).getTime();
+ if(now-last<IDLE_LIMIT_MS)return false;
+ // Store the effective duration at the last input, not after the idle hour.
+ const stoppedAt=Math.max(new Date(w.started).getTime(),Math.min(last,now));
+ const pausedEnd=w.pausedAt?Math.min(stoppedAt,w.pausedAt):stoppedAt;
+ w.activeDurationMs=Math.max(0,pausedEnd-new Date(w.started).getTime()-(w.pausedMs||0));
+ w.ended=new Date(stoppedAt).toISOString();
+ w.autoEnded=true;
+ if(w.exercises.some(e=>e.sets.some(x=>x.done))){markRecords(w,db.history);db.history.push(w);db.history.sort((a,b)=>new Date(a.ended)-new Date(b.ended))}
+ db.active=null;
+ releaseScreenWakeLock();
+ timer=null;
+ save();
+ if(document.getElementById('modal')?.open)closeModal();
+ if(tab==='workout')tab='home';
+ render();
+ return true;
+}
+document.addEventListener('pointerdown',registerActivity,{passive:true});
+document.addEventListener('keydown',registerActivity);
+document.addEventListener('input',registerActivity);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkInactivity()});
+function render(){
+
+document.querySelector('header').innerHTML=db.active?trainingHeader():brandHeader();
+document.getElementById('nav').innerHTML=[['home','Start'],...(db.active?[['workout','Training']]:[]),['plans','Pläne'],['library','Übungen'],['stats','Statistik'],['settings','Mehr']].map(([id,name])=>`<button class="${tab===id?'active':''}" onclick="go('${id}')">${ICONS[id]}<span>${name}</span></button>`).join('');
+let a=document.getElementById('app');
+if(tab==='home')a.innerHTML=home();
+if(tab==='plans')a.innerHTML=plans();
+if(tab==='library')a.innerHTML=library();
+if(tab==='stats')a.innerHTML=stats();
+if(tab==='settings')a.innerHTML=settings();
+if(tab==='workout')a.innerHTML=workout();
+updateTimers();
+}
+function go(t){tab=t;render();scrollTo(0,0)}
+function daysAgo(date){if(!date)return 'Noch nie';const m=t=>{const x=new Date(t);x.setHours(0,0,0,0);return x.getTime()};let d=Math.max(0,Math.round((m(Date.now())-m(date))/86400000));return d===0?'Heute':d===1?'Vor 1 Tag':`Vor ${d} Tagen`}
+function planAge(id){let h=db.history.filter(w=>w.planId===id).sort((a,b)=>new Date(b.ended)-new Date(a.ended));return h.length?`Letztes Training: ${daysAgo(h[0].ended)}`:'Noch nicht trainiert'}
+function historyTable(sets){return `<div class="last-history"><div class="last-history-head"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small></div>${sets.map((s,i)=>`<div class="last-history-row"><span>${i+1}</span><span>${Number(s.weight).toLocaleString('de-DE')} kg</span><span>${s.reps}${s.pr?.length?' '+TRS:''}</span></div>`).join('')}</div>`}
+function showExerciseHistory(id){let a=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(s=>s.done)}))).filter(x=>x.sets.length).sort((a,b)=>new Date(b.date)-new Date(a.date)),name=ex(id)?.name||'Übung';modal(`<h2>${esc(name)}</h2>${recordsCard(id)}${a.length?a.slice(0,12).map((x,i)=>{let max=Math.max(...x.sets.map(s=>Number(s.weight)||0)),prev=a[i+1],delta=prev?max-Math.max(...prev.sets.map(s=>Number(s.weight)||0)):null;return `<div class="card"><b>${fmt(x.date)} · ${daysAgo(x.date)}</b>${historyTable(x.sets)}<small>${delta===null?'':`Max. Gewicht: ${delta>0?'+':''}${delta.toLocaleString('de-DE')} kg zur vorherigen Einheit`}</small></div>`}).join(''):'<p class="muted">Noch keine abgeschlossenen Sätze für diese Übung.</p>'}<p>${btn('Schließen','closeModal()')}</p>`)}
+function home(){return `${db.active?`<div class="banner"><b>Training läuft</b><p>${esc(db.active.name)} · ${db.active.exercises.length} Übungen</p>${btn('Training fortsetzen',"go('workout')",'primary')}</div>`:''}${backupBanner()}<h2>Dein Training</h2><p class="muted">Wähle eine Kategorie und starte einen Plan.</p>${CATS.map(c=>`<div class="card"><h3>${esc(c)}</h3>${db.plans.filter(p=>p.category===c).map(p=>`<div class="row between" style="padding:9px 0;border-top:1px solid var(--line)"><div><b>${esc(p.name)}</b><div class="muted tiny">${p.exercises.length} Übungen · ${planAge(p.id)}</div></div>${btn('Starten',`start('${p.id}')`,'primary')}</div>`).join('')||'<small>Noch keine Pläne</small>'}${btn('+ Plan erstellen',`newPlan('${c}')`)}</div>`).join('')}<h2>Letztes Training</h2>${db.history.length?`<div class="card"><b>${esc(db.history.at(-1).name)}</b><div class="muted">${fmt(db.history.at(-1).ended)} · ${db.history.at(-1).exercises.length} Übungen</div></div>`:'<div class="card muted">Noch kein Training abgeschlossen.</div>'}`}
+function plans(){return `<div class="row between"><h2>Trainingspläne</h2>${btn('+ Neu',"newPlan()",'primary')}</div>${CATS.map(c=>`<h3 style="margin:22px 0 10px">${c}</h3>${db.plans.filter(p=>p.category===c).map(p=>`<div class="card"><div class="row between"><b>${esc(p.name)}</b><span class="pill">${p.exercises.length} Übungen</span></div><p class="muted tiny">${p.exercises.map(id=>esc(ex(id)?.name||'Gelöschte Übung')).join(' · ')}</p><div class="actions">${btn('Starten',`start('${p.id}')`,'primary')}${btn('Bearbeiten',`editPlan('${p.id}')`)}${btn('Löschen',`deletePlan('${p.id}')`,'danger')}</div></div>`).join('')||'<div class="muted">Noch keine Pläne</div>'}`).join('')}`}
+function library(){return `<div class="row between"><h2>Übungsbibliothek</h2>${btn('+ Übung',"editExercise()",'primary')}</div><input placeholder="Übung, Muskel oder Gerät suchen …" value="${esc(filter)}" oninput="filter=this.value;document.getElementById('results').innerHTML=libraryResults()"><div class="filterbar">${['Alle',...Object.keys(icons)].map(m=>`<button class="${muscleFilter===m?'chosen':''}" onclick="muscleFilter='${m}';render()">${m}</button>`).join('')}</div><div id="results">${libraryResults()}</div>`}
+function libraryResults(){return db.exercises.filter(e=>(muscleFilter==='Alle'||e.muscle===muscleFilter)&&(e.name+' '+e.muscle+' '+e.equipment).toLowerCase().includes(filter.toLowerCase())).map(e=>`<div class="card row">${thumb(e.id)}<div class="grow"><b>${esc(e.name)}</b><div class="muted tiny">${esc(e.muscle)} · ${esc(e.equipment)} · ${e.step||2.5} kg/Schritt</div></div>${btn(ICONS.pen,`editExercise('${e.id}')`)}</div>`).join('')||'<div class="empty">Keine passenden Übungen</div>'}
+function stats(){let count=db.history.length,sets=db.history.flatMap(w=>w.exercises.flatMap(e=>e.sets.filter(s=>s.done)));let vol=sets.reduce((n,s)=>n+(+s.weight||0)*(+s.reps||0),0);return `<h2>Deine Fortschritte</h2><div class="row"><div class="card grow"><div class="stat">${count}</div><small>Trainings</small></div><div class="card grow"><div class="stat">${sets.length}</div><small>Sätze</small></div></div><div class="card"><div class="stat">${Math.round(vol).toLocaleString('de-DE')} kg</div><small>Bewegtes Gesamtvolumen (Gewicht × Wiederholungen)</small></div>${recordsSection()}<h2>Übungsfortschritt</h2><select id="statEx" onchange="statDetail(this.value)"><option value="">Übung wählen …</option>${db.exercises.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select><div id="statDetail"></div><h2>Verlauf</h2><p class="muted tiny">Gewichtsveränderungen je Übung über das Statistik-Symbol im Training.</p>${db.history.slice().reverse().map(w=>`<div class="card"><b>${esc(w.name)}</b><div class="muted tiny">${fmt(w.ended)} · ${daysAgo(w.ended)} ${w.autoEnded?"· Automatisch beendet":""}${w.recordExercises?` · <span style="color:#ffc46b">${TRS} ${w.recordExercises} Rekord${w.recordExercises===1?"":"e"}</span>`:""} · ${w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0)} Sätze</div></div>`).join('')||'<div class="card muted">Noch keine Trainingsdaten</div>'}`}
+function statDetail(id){let a=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(s=>s.done)})));document.getElementById('statDetail').innerHTML=recordsCard(id)+(a.length?a.sort((x,y)=>new Date(y.date)-new Date(x.date)).map(x=>`<div class="card"><b>${fmt(x.date)} · ${daysAgo(x.date)}</b>${historyTable(x.sets)}</div>`).join(''):'<p class="muted">Noch keine Werte für diese Übung.</p>')}
+function settings(){return `<h2>Einstellungen & Sicherung</h2><div class="card"><h3>Trainingsdaten</h3><p class="muted tiny">Löscht den gesamten Verlauf. Pläne und Übungen bleiben erhalten.</p><div class="actions">${btn("Verlauf löschen","resetHistory()","danger")}</div></div><div class="card"><label>Standard-Pausenzeit in Sekunden</label><input type="number" min="0" value="${db.rest}" onchange="db.rest=Math.max(0,+this.value);save()"><p class="muted tiny">Der Pausentimer startet nach dem Abhaken eines Satzes.</p></div><div class="card"><h3>Datensicherung</h3><p class="muted">Alle Daten liegen lokal auf diesem Gerät. Nach jeweils 10 Trainings erinnert dich Eisenbieger an eine Sicherung. Die Backup-Datei brauchst du auch für einen Handywechsel: auf dem neuen Gerät einfach „Backup importieren“.</p><p class="tiny" style="color:${backupDue()?'#ffd978':'var(--muted)'}">${backupStatus()}</p><div class="actions">${btn('Backup exportieren','exportData()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / Cloud','shareBackup()'):''}<button onclick="document.getElementById('importFile').click()">Backup importieren</button></div><input id="importFile" type="file" accept=".json,application/json" class="hide" onchange="importData(this)"></div><div class="card"><h3>App installieren</h3>${isStandalone()?'<p class="muted">Eisenbieger läuft bereits als App.</p>':deferredInstall?`<p class="muted">Eisenbieger als App auf den Startbildschirm legen.</p><div class="actions">${btn('Installieren','installApp()','primary')}</div>`:'<p class="muted">Chrome-Menü (⋮) → „App installieren“ oder „Zum Startbildschirm hinzufügen“. Das geht nur, wenn die Seite über https geöffnet wurde, nicht direkt als Datei.</p>'}</div><div class="card"><h3>Hinweis</h3><p class="muted">Eisenbieger arbeitet offline. Alle Daten bleiben lokal auf diesem Gerät, es gibt kein Konto und keinen Server.</p></div>`}
+function newPlan(c){modal(`<h2>Neuer Trainingsplan</h2><label>Name</label><input id="pn" placeholder="z. B. Plan 2 – Variation"><label>Kategorie</label><select id="pc">${CATS.map(x=>`<option ${x===(c||CATS[0])?'selected':''}>${x}</option>`).join('')}</select><p>${btn('Erstellen',"createPlan()",'primary')}</p>`)}
+function createPlan(){let name=document.getElementById('pn').value.trim();if(!name)return alert('Bitte Namen eingeben');let id=uid();db.plans.push({id,name,category:document.getElementById('pc').value,exercises:[]});save();closeModal();editPlan(id)}
+function editPlan(id){let p=db.plans.find(p=>p.id===id);if(!p)return;modal(`<h2>Plan bearbeiten</h2><label>Name</label><input id="pn" value="${esc(p.name)}"><label>Kategorie</label><select id="pc">${CATS.map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}</select><h3 style="margin-top:18px">Übungen</h3><div id="planItems">${p.exercises.map((eid,i)=>`<div class="row between" style="padding:6px 0"><span>${esc(ex(eid)?.name||'?')}</span>${btn(ICONS.up,`movePlan('${id}',${i},-1)`)}${btn(ICONS.down,`movePlan('${id}',${i},1)`)}${btn('×',`removePlanEx('${id}',${i})`,'danger')}</div>`).join('')}</div><label>Übung hinzufügen</label><select id="addEx">${exOptions()}</select><p>${btn('+ Hinzufügen',`addPlanEx('${id}')`)}</p><div class="actions">${btn('Speichern',`savePlan('${id}')`,'primary')}${btn('Schließen','closeModal()')}</div>`)}
+function savePlan(id){let p=db.plans.find(x=>x.id===id);p.name=document.getElementById('pn').value.trim()||p.name;p.category=document.getElementById('pc').value;save();closeModal();render()}
+function keepPlanFields(id){let p=db.plans.find(x=>x.id===id),n=document.getElementById('pn'),c=document.getElementById('pc');if(p&&n&&n.value.trim())p.name=n.value.trim();if(p&&c)p.category=c.value}
+function addPlanEx(id){keepPlanFields(id);let v=document.getElementById('addEx').value;if(!v)return;db.plans.find(p=>p.id===id).exercises.push(v);save();editPlan(id)}
+function removePlanEx(id,i){keepPlanFields(id);db.plans.find(p=>p.id===id).exercises.splice(i,1);save();editPlan(id)}
+function movePlan(id,i,d){keepPlanFields(id);let a=db.plans.find(p=>p.id===id).exercises,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();editPlan(id)}
+function deletePlan(id){if(confirm('Plan wirklich löschen?')){db.plans=db.plans.filter(p=>p.id!==id);save();render()}}
+function editExercise(id){let e=db.exercises.find(e=>e.id===id);modal(`<h2>${e?'Übung bearbeiten':'Neue Übung'}</h2><label>Name</label><input id="en" value="${esc(e?.name||'')}" placeholder="Übungsname"><label>Muskelgruppe</label><select id="em">${Object.keys(icons).map(m=>`<option ${e?.muscle===m?'selected':''}>${m}</option>`).join('')}</select><label>Gerät</label><input id="ee" value="${esc(e?.equipment||'')}" placeholder="z. B. Kurzhanteln"><label>Gewichtsschritte (kg)</label><input id="es" type="number" min="0.1" step="0.5" inputmode="decimal" value="${e?.step||2.5}"><p class="muted tiny">Bei Kurzhanteln erfasst du das Gesamtgewicht beider Hanteln.</p><p>${btn('Speichern',`saveExercise('${id||''}')`,'primary')} ${btn('Abbrechen','closeModal()')}</p>`)}
+function saveExercise(id){let name=document.getElementById('en').value.trim();if(!name)return alert('Name fehlt');let obj={id:id||uid(),name,muscle:document.getElementById('em').value,equipment:document.getElementById('ee').value.trim(),step:Math.max(.1,Number(document.getElementById('es').value)||2.5)};if(id)Object.assign(ex(id),obj);else db.exercises.push(obj);save();closeModal();render()}
+function start(id){if(db.active){go('workout');return}let p=db.plans.find(p=>p.id===id);db.active={id:uid(),planId:id,name:p.name,started:new Date().toISOString(),pausedMs:0,pausedAt:null,timers:[],lastActivityAt:Date.now(),exercises:p.exercises.map(eid=>makeWorkoutEx(eid))};save();keepScreenAwake();go('workout')}
+function makeWorkoutEx(id){let last=latest(id);if(last){let d=last.sets.filter(s=>s.done);last=d.length?{sets:d}:null}return {key:uid(),id,sets:last?last.sets.map(s=>({weight:s.weight,reps:s.reps,done:false,doneAt:null})).slice(0,8):Array.from({length:3},()=>({weight:0,reps:ex(id)?.reps||10,done:false,doneAt:null}))}}
+function trainingHeader(){let w=db.active;return `<div class="training-head"><div class="training-controls"><div class="tiny muted">${esc(w.name)}</div><div class="tiny">Aktiv: <span id="duration">00:00</span></div>${w.pausedAt?`<div class="actions">${btn('Weiter','resumeWorkout()','primary')}${btn('Ende','finishWorkout()','danger')}</div>`:btn('Pause','pauseWorkout()')}</div><div class="timer-stack" id="timerStack"></div></div>`}
+function pauseWorkout(){if(!db.active||db.active.pausedAt)return;db.active.pausedAt=Date.now();save();render()}
+function resumeWorkout(){if(!db.active?.pausedAt)return;db.active.pausedMs+=Date.now()-db.active.pausedAt;db.active.pausedAt=null;save();render()}
+function elapsed(w){return Math.max(0,((w.pausedAt||Date.now())-new Date(w.started).getTime()-(w.pausedMs||0)))}
+function updateTimers(){let w=db.active;if(!w)return;let d=document.getElementById('duration');if(d){let sec=Math.floor(elapsed(w)/1000);d.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}let stack=document.getElementById('timerStack');if(!stack)return;let arr=(w.timers||[]).slice(-2);stack.innerHTML=arr.length?arr.map(t=>{let left=Math.max(0,Math.ceil((t.end-Date.now())/1000)),pct=Math.max(0,Math.min(100,(t.end-Date.now())/Math.max(1,t.duration)*100));let color=left===0?'#e6dcc3':pct>50?'#ff9a2e':'#ffd35a';return `<div class="timer-item"><div class="row between"><span class="timer-name">${esc(ex(t.id)?.name||'Übung')}</span><b style="color:${color}">${left?Math.floor(left/60)+':'+String(left%60).padStart(2,'0'):'Fertig'}</b></div><div class="track"><div style="height:100%;width:${Math.ceil(pct/10)*10}%;background:${color}"></div></div></div>`}).join(''):'<div class="tiny muted">Noch keine Satzpause</div>'}
+function lastSessionSummary(id){const sessions=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(x=>x.done),demo:!!w.demo}))).filter(x=>x.sets.length).sort((a,b)=>new Date(b.date)-new Date(a.date));if(!sessions.length)return `<div class="last-session">Letztes Training: Noch keine Aufzeichnung</div>`;const last=sessions[0];return `<div class="last-session"><b>Letztes Training:</b> ${fmt(last.date)} · ${daysAgo(last.date)}<div class="last-history"><div class="last-history-head"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small></div>${last.sets.map((x,i)=>`<div class="last-history-row"><span>${i+1}</span><span>${Number(x.weight).toLocaleString('de-DE')} kg</span><span>${x.reps}</span></div>`).join('')}</div></div>`}
+function resetHistory(){if(confirm('Gesamten Trainingsverlauf und ein laufendes Training löschen? Pläne und Übungen bleiben erhalten.')){db.history=[];db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
+function workout(){let w=db.active;if(!w)return `<h2>Kein aktives Training</h2>${btn('Pläne öffnen',"go('home')")}`;return `${w.pausedAt?'<div class="banner">Workout pausiert – die Satzpausen laufen weiter.</div>':''}<p class="muted tiny">Übungen wechseln, verschieben oder ergänzen. Die Trainingsdauer zählt Unterbrechungen nicht mit.</p>${w.exercises.map((e,i)=>`<div class="card"><div class="row between"><div class="row">${thumb(e.id)}<div><h3>${esc(ex(e.id)?.name||'Übung')}</h3><small>${esc(ex(e.id)?.muscle||'')} · Schritt ${ex(e.id)?.step||2.5} kg</small></div></div><div class="actions">${btn(ICONS.stat,`showExerciseHistory('${e.id}')`)}${btn(ICONS.up,`moveWorkout(${i},-1)`)}${btn(ICONS.down,`moveWorkout(${i},1)`)}</div></div><div class="setlabels"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small><small>OK</small></div>${prRows(e,i,w)}<div class="actions">${btn('+ Satz',`addSet(${i})`)}${btn('- Satz',`removeSet(${i})`)}</div>${lastSessionSummary(e.id)}<div class="row between" style="margin-top:10px"><span class="muted tiny">${e.sets.filter(s=>s.done).length}/${e.sets.length} Sätze erledigt</span><span class="workout-bottom">${btn(ICONS.x,`removeWorkout(${i})`,"danger")}</span></div></div>`).join('')}<div class="card">${btn('+ Übung hinzufügen','chooseWorkoutExercise()','primary')}</div><div class="card">${btn('Training abschließen','finishWorkout()','primary')} ${btn('Verwerfen','discardWorkout()','danger')}</div>`}
+function adjust(i,j,k,dir){if(db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],step=k==='weight'?(ex(db.active.exercises[i].id)?.step||2.5):1;s[k]=Math.max(0,Math.round(((Number(s[k])||0)+dir*step)*100)/100);save();render()}
+function setValue(i,j,k,v){if(!db.active||db.active.pausedAt)return;db.active.exercises[i].sets[j][k]=Math.max(0,Number(v)||0);save()}
+function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render()}
+function addSet(i){let a=db.active.exercises[i].sets,last=a.at(-1)||{weight:0,reps:10};a.push({weight:last.weight,reps:last.reps,done:false,doneAt:null});save();render()}
+function removeSet(i){let a=db.active.exercises[i].sets;if(a.length>1)a.pop();save();render()}
+function moveWorkout(i,d){let a=db.active.exercises,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
+function removeWorkout(i){if(confirm('Übung aus dieser Einheit entfernen?')){db.active.exercises.splice(i,1);save();render()}}
+function chooseWorkoutExercise(){modal(`<h2>Übung hinzufügen</h2><input id="exSearch" placeholder="Suchen …" oninput="document.getElementById('chooseList').innerHTML=chooseList(this.value)"><div id="chooseList">${chooseList('')}</div><p>${btn('Schließen','closeModal()')}</p>`)}
+function chooseList(q){return db.exercises.filter(e=>(e.name+' '+e.muscle).toLowerCase().includes(q.toLowerCase())).map(e=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="row">${thumb(e.id,1)}${esc(e.name)}</span>${btn('+',`addWorkoutExercise('${e.id}')`,'primary')}</div>`).join('')}
+function addWorkoutExercise(id){db.active.exercises.push(makeWorkoutEx(id));save();closeModal();render()}
+function finishWorkout(){if(!db.active)return;if(!confirm('Training abschließen und speichern?'))return;let w=db.active;w.ended=new Date().toISOString();w.activeDurationMs=elapsed(w);markRecords(w,db.history);db.history.push(w);db.active=null;releaseScreenWakeLock();timer=null;save();if(confirm('Die Übungsauswahl und Reihenfolge dauerhaft in den ursprünglichen Plan übernehmen?')){let p=db.plans.find(p=>p.id===w.planId);if(p){p.exercises=w.exercises.map(e=>e.id);save()}}go('stats');afterWorkout(w)}
+function discardWorkout(){if(confirm('Training wirklich verwerfen?')){db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
+function modal(html){let d=document.getElementById('modal');d.innerHTML=html;d.scrollTop=0;d.showModal();d.scrollTop=0;requestAnimationFrame(()=>{d.scrollTop=0;const first=d.querySelector('h2');if(first)first.scrollIntoView({block:'start',behavior:'instant'});d.scrollTop=0})}
+function closeModal(){document.getElementById('modal').close()}
+async function importData(input){let f=input.files[0];if(!f)return;try{let data=JSON.parse(await f.text());if(!Array.isArray(data.exercises)||!Array.isArray(data.plans)||!Array.isArray(data.history))throw Error('Ungültige Datei');if(confirm('Alle aktuellen Daten durch das Backup ersetzen?')){db=data;normalizeDb();save();render()}}catch(e){alert('Backup konnte nicht gelesen werden: '+e.message)}}
+/* ===== Rekorde ===== */
+const e1rmOf=(w,r)=>{w=+w||0;r=+r||0;return (w<=0||r<=0)?0:(r===1?w:w*(1+r/30))};
+const num=v=>Number(v).toLocaleString('de-DE',{maximumFractionDigits:1});
+function addBest(b,s){const w=+s.weight||0,r=+s.reps||0;if(r<=0)return;b.n++;if(w>b.w)b.w=w;const e=e1rmOf(w,r);if(e>b.e)b.e=e;const k=String(w);if(b.rw[k]===undefined||r>b.rw[k])b.rw[k]=r}
+function bestsOf(id,hist){const b={n:0,w:0,e:0,rw:{}};for(const wk of hist)for(const x of wk.exercises)if(x.id===id)for(const s of x.sets)if(s.done)addBest(b,s);return b}
+function recordCodes(b,s){const w=+s.weight||0,r=+s.reps||0,c=[];if(!b.n||r<=0)return c;if(w>b.w)c.push('w');const k=String(w);if(w<=b.w&&b.rw[k]!==undefined&&r>b.rw[k])c.push('r');if(w>0&&e1rmOf(w,r)>b.e+0.05)c.push('e');return c}
+function computeSetRecords(id,sets,hist){const b=bestsOf(id,hist);return sets.map(s=>{if(!s.done)return [];const c=recordCodes(b,s);addBest(b,s);return c})}
+function prLabel(codes,s){return codes.map(c=>c==='w'?'Gewicht':c==='r'?'Wdh.':'1RM ≈ '+num(e1rmOf(s.weight,s.reps))+' kg').join(' · ')}
+function markRecords(w,hist){let n=0;w.exercises.forEach(e=>{const R=computeSetRecords(e.id,e.sets,hist);let any=false;e.sets.forEach((s,j)=>{if(R[j].length){s.pr=R[j];any=true}else delete s.pr});if(any)n++});w.recordExercises=n}
+function recordSummary(id){const hs=db.history.slice().sort((a,b)=>new Date(a.ended)-new Date(b.ended));const r={n:0,w:null,e:null,rw:{},last:null};for(const wk of hs)for(const x of wk.exercises)if(x.id===id)for(const s of x.sets){if(!s.done)continue;const w=+s.weight||0,reps=+s.reps||0;if(reps<=0)continue;r.n++;r.last=wk.ended;if(!r.w||w>r.w.w||(w===r.w.w&&reps>r.w.r))r.w={w,r:reps,d:wk.ended};const e=e1rmOf(w,reps);if(e>0&&(!r.e||e>r.e.v+0.05))r.e={v:e,w,r:reps,d:wk.ended};const k=String(w);if(!r.rw[k]||reps>r.rw[k].r)r.rw[k]={w,r:reps,d:wk.ended}}return r}
+function recordsCard(id){const r=recordSummary(id);if(!r.n)return '';const rows=Object.values(r.rw).sort((a,b)=>b.w-a.w).slice(0,8);const bw=r.w.w===0;return `<div class="card prcard"><b>${TR} Persönliche Rekorde</b><div class="prgrid">${bw?`<span>Meiste Wiederholungen</span><span>${r.w.r} (${fmt(r.w.d)})</span>`:`<span>Schwerstes Gewicht</span><span>${num(r.w.w)} kg × ${r.w.r} (${fmt(r.w.d)})</span>`}${r.e?`<span>Geschätztes 1RM</span><span>${num(r.e.v)} kg (${num(r.e.w)} × ${r.e.r}, ${fmt(r.e.d)})</span>`:''}</div>${rows.length>1||!bw?`<small class="muted">Bestwerte je Gewicht</small><div class="prtable">${rows.map(x=>`<span>${num(x.w)} kg</span><span>${x.r} Wdh.</span><span>${fmt(x.d)}</span>`).join('')}</div>`:''}</div>`}
+function recentRecords(limit=6){const out=[];db.history.forEach(w=>w.exercises.forEach(e=>e.sets.forEach(s=>{if(s.done&&s.pr?.length)out.push({d:w.ended,id:e.id,s})})));out.sort((a,b)=>new Date(b.d)-new Date(a.d));const seen=new Set(),res=[];for(const o of out){const k=o.d+o.id;if(seen.has(k))continue;seen.add(k);res.push(o);if(res.length>=limit)break}return res}
+function recordsSection(){const rec=recentRecords();const ids=db.exercises.filter(e=>db.history.some(w=>w.exercises.some(x=>x.id===e.id&&x.sets.some(s=>s.done)))).map(e=>({e,r:recordSummary(e.id)})).sort((a,b)=>new Date(b.r.last)-new Date(a.r.last));return `<h2>${TR} Rekorde</h2>${rec.length?`<div class="card prcard"><b>Zuletzt gebrochen</b>${rec.map(o=>`<div class="prrow" onclick="showExerciseHistory('${o.id}')"><span>${esc(ex(o.id)?.name||'Übung')}</span><span class="tiny muted">${prLabel(o.s.pr,o.s)} · ${num(o.s.weight)} kg × ${o.s.reps} · ${fmt(o.d)}</span></div>`).join('')}</div>`:'<div class="card muted">Rekorde erscheinen ab dem zweiten Training einer Übung.</div>'}${ids.length?`<details class="card"><summary><b>Bestwerte aller Übungen (${ids.length})</b></summary>${ids.map(({e,r})=>`<div class="prrow" onclick="showExerciseHistory('${e.id}')"><span>${esc(e.name)}</span><span class="tiny muted">${r.w.w===0?`max. ${r.w.r} Wdh.`:`${num(r.w.w)} kg × ${r.w.r}`}${r.e?` · 1RM ≈ ${num(r.e.v)} kg`:''}</span></div>`).join('')}<p class="tiny muted">Geschätztes 1RM nach Epley: Gewicht × (1 + Wdh. ÷ 30).</p></details>`:''}`}
+function prRows(e,i,w){const R=computeSetRecords(e.id,e.sets,db.history);return e.sets.map((s,j)=>ROWTPL(e,i,j,s,w)+(R[j].length?`<div class="prline">${TR} Rekord: ${prLabel(R[j],s)}</div>`:'')).join('')}
+/* ===== Sicherung ===== */
+const BACKUP_EVERY=10;
+const sinceBackup=()=>db.history.length-(db.backup?.count||0);
+const backupDue=()=>sinceBackup()>=BACKUP_EVERY;
+function backupStatus(){return db.backup?.at?`Letzte Sicherung: ${fmt(db.backup.at)} · seitdem ${sinceBackup()} Training${sinceBackup()===1?'':'e'}`:`Noch keine Sicherung · ${db.history.length} Training${db.history.length===1?'':'e'} gespeichert`}
+function backupBanner(){return backupDue()?`<div class="banner"><b>Datensicherung fällig</b><p>Seit der letzten Sicherung hast du ${sinceBackup()} Trainings gespeichert.</p>${btn('Jetzt sichern','backupNow()','primary')}</div>`:''}
+function markBackup(){db.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};save()}
+const backupName=()=>'eisenbieger-backup-'+new Date().toISOString().slice(0,10)+'.json';
+// A download request alone cannot prove that the user retained the file.
+// Export a snapshot with the new backup metadata, then require user confirmation.
+function backupSnapshot(){const data=JSON.parse(JSON.stringify(db));data.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};return JSON.stringify(data,null,2)}
+function exportData(){
+ const blob=new Blob([backupSnapshot()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ try{
+  a.href=url;a.download=backupName();document.body.appendChild(a);a.click();
+ }catch(e){alert('Backup-Download konnte nicht gestartet werden: '+e.message);return false}
+ finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+ if(confirm('Wurde die Backup-Datei erfolgreich auf deinem Gerät gespeichert? Nur dann wird die Sicherung als abgeschlossen markiert.')){markBackup();return true}
+ return false;
+}
+async function shareBackup(){
+ const file=new File([backupSnapshot()],backupName(),{type:'application/json'});
+ if(navigator.canShare?.({files:[file]})){
+  try{await navigator.share({files:[file],title:'Eisenbieger Backup'});markBackup();if(document.getElementById('modal').open)closeModal();render();return}
+  catch(e){if(e?.name==='AbortError')return;console.warn('Teilen fehlgeschlagen, Download wird angeboten:',e)}
+ }
+ backupNow();
+}
+function backupNow(){const ok=exportData();if(ok&&document.getElementById('modal').open)closeModal();render()}
+function snoozeBackup(){db.backup??={at:null,count:0};db.backup.snooze=db.history.length+3;save();closeModal()}
+function afterWorkout(w){const recs=[];w.exercises.forEach(e=>{const sets=e.sets.filter(s=>s.done&&s.pr?.length);if(!sets.length)return;const best=sets.reduce((a,b)=>((+b.weight||0)>(+a.weight||0)||((+b.weight||0)===(+a.weight||0)&&(+b.reps||0)>(+a.reps||0)))?b:a);const codes=[...new Set(sets.flatMap(s=>s.pr))];recs.push(`<div class="prrow"><span>${esc(ex(e.id)?.name||'Übung')}</span><span class="tiny muted">${prLabel(codes,best)} · ${num(best.weight)} kg × ${best.reps}</span></div>`)});const due=backupDue()&&db.history.length>=(db.backup?.snooze||0);if(!recs.length&&!due)return;modal(`<h2>Training gespeichert</h2>${recs.length?`<div class="card prcard"><b>${TR} Neue Rekorde bei ${recs.length} Übung${recs.length===1?'':'en'}</b>${recs.join('')}</div>`:''}${due?`<div class="card"><b>Zeit für eine Sicherung</b><p class="muted">Seit der letzten Sicherung sind ${sinceBackup()} Trainings dazugekommen. Die Datei hilft dir auch beim Handywechsel.</p><div class="actions">${btn('Jetzt sichern','backupNow()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / in Cloud speichern','shareBackup()'):''}${btn('Später','snoozeBackup()')}</div></div>`:''}${due?'':`<p>${btn('Schließen','closeModal()')}</p>`}`)}
+/* ===== Installation ===== */
+let deferredInstall=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(tab==='settings')render()});
+addEventListener('appinstalled',()=>{deferredInstall=null;render()});
+async function installApp(){if(!deferredInstall)return;deferredInstall.prompt();try{await deferredInstall.userChoice}catch{}deferredInstall=null;render()}
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+try{navigator.storage?.persist?.()}catch{}
+
+function ROWTPL(e,i,j,s,w){return `<div class="sets"><small>${j+1}</small><div class="stepper"><button onclick="adjust(${i},${j},'weight',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="decimal" min="0" aria-label="Gewicht Satz ${j+1}" value="${s.weight}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'weight',this.value)"><button onclick="adjust(${i},${j},'weight',1)" ${w.pausedAt?'disabled':''}>+</button></div><div class="stepper"><button onclick="adjust(${i},${j},'reps',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="numeric" min="0" aria-label="Wiederholungen Satz ${j+1}" value="${s.reps}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'reps',this.value)"><button onclick="adjust(${i},${j},'reps',1)" ${w.pausedAt?'disabled':''}>+</button></div><button class="${s.done?'done':''}" onclick="toggleSet(${i},${j})" ${w.pausedAt?'disabled':''}>${s.done?CHK:''}</button></div>`}
+
+setInterval(()=>{if(checkInactivity())return;updateTimers();},500);
+checkInactivity();
+render();
+if(db.active)keepScreenAwake();
+</script></body></html>
