@@ -11,8 +11,7 @@ self.addEventListener('fetch',e=>{
   try{
    const response=await fetch(req);
    if(response.ok && (response.type==='basic'||response.type==='default')){
-    const cache=await caches.open(CACHE);
-    cache.put(req,response.clone()).catch(()=>{}); // A cache failure must not break an online request.
+    caches.open(CACHE).then(cache=>cache.put(req,response.clone())).catch(()=>{}); // Cache failures must not block network responses.
    }
    return response;
   }catch(err){
