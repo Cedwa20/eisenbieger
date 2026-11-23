@@ -510,7 +510,100 @@ function home(){return `${db.active?`<div class="banner"><b>Training läuft</b><
 function plans(){return `<div class="row between"><h2>Trainingspläne</h2>${btn('+ Neu',"newPlan()",'primary')}</div>${CATS.map(c=>`<h3 style="margin:22px 0 10px">${c}</h3>${db.plans.filter(p=>p.category===c).map(p=>`<div class="card"><div class="row between"><b>${esc(p.name)}</b><span class="pill">${p.exercises.length} Übungen</span></div><p class="muted tiny">${p.exercises.map(id=>esc(ex(id)?.name||'Gelöschte Übung')).join(' · ')}</p><div class="actions">${btn('Starten',`start('${p.id}')`,'primary')}${btn('Bearbeiten',`editPlan('${p.id}')`)}${btn('Löschen',`deletePlan('${p.id}')`,'danger')}</div></div>`).join('')||'<div class="muted">Noch keine Pläne</div>'}`).join('')}`}
 function library(){return `<div class="row between"><h2>Übungsbibliothek</h2>${btn('+ Übung',"editExercise()",'primary')}</div><input placeholder="Übung, Muskel oder Gerät suchen …" value="${esc(filter)}" oninput="filter=this.value;document.getElementById('results').innerHTML=libraryResults()"><div class="filterbar">${['Alle',...Object.keys(icons)].map(m=>`<button class="${muscleFilter===m?'chosen':''}" onclick="muscleFilter='${m}';render()">${m}</button>`).join('')}</div><div id="results">${libraryResults()}</div>`}
 function libraryResults(){return db.exercises.filter(e=>(muscleFilter==='Alle'||e.muscle===muscleFilter)&&(e.name+' '+e.muscle+' '+e.equipment).toLowerCase().includes(filter.toLowerCase())).map(e=>`<div class="card row">${thumb(e.id)}<div class="grow"><b>${esc(e.name)}</b><div class="muted tiny">${esc(e.muscle)} · ${esc(e.equipment)} · ${e.step||2.5} kg/Schritt</div></div>${btn(ICONS.pen,`editExercise('${e.id}')`)}</div>`).join('')||'<div class="empty">Keine passenden Übungen</div>'}
-function stats(){let count=db.history.length,sets=db.history.flatMap(w=>w.exercises.flatMap(e=>e.sets.filter(s=>s.done)));let vol=sets.reduce((n,s)=>n+(+s.weight||0)*(+s.reps||0),0);return `<h2>Deine Fortschritte</h2><div class="row"><div class="card grow"><div class="stat">${count}</div><small>Trainings</small></div><div class="card grow"><div class="stat">${sets.length}</div><small>Sätze</small></div></div><div class="card"><div class="stat">${Math.round(vol).toLocaleString('de-DE')} kg</div><small>Bewegtes Gesamtvolumen (Gewicht × Wiederholungen)</small></div>${recordsSection()}<h2>Übungsfortschritt</h2><select id="statEx" onchange="statDetail(this.value)"><option value="">Übung wählen …</option>${db.exercises.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select><div id="statDetail"></div><h2>Verlauf</h2><p class="muted tiny">Gewichtsveränderungen je Übung über das Statistik-Symbol im Training.</p>${db.history.slice().reverse().map(w=>`<div class="card"><b>${esc(w.name)}</b><div class="muted tiny">${fmt(w.ended)} · ${daysAgo(w.ended)} ${w.autoEnded?"· Automatisch beendet":""}${w.recordExercises?` · <span style="color:#ffc46b">${TRS} ${w.recordExercises} Rekord${w.recordExercises===1?"":"e"}</span>`:""} · ${w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0)} Sätze</div></div>`).join('')||'<div class="card muted">Noch keine Trainingsdaten</div>'}`}
+function stats(){let count=db.history.length,sets=db.history.flatMap(w=>w.exercises.flatMap(e=>e.sets.filter(s=>s.done)));let vol=sets.reduce((n,s)=>n+(+s.weight||0)*(+s.reps||0),0);return `<h2>Deine Fortschritte</h2><div class="row"><div class="card grow"><div class="stat">${count}</div><small>Trainings</small></div><div class="card grow"><div class="stat">${sets.length}</div><small>Sätze</small></div></div><div class="card"><div class="stat">${Math.round(vol).toLocaleString('de-DE')} kg</div><small>Bewegtes Gesamtvolumen (Gewicht × Wiederholungen)</small></div>${recordsSection()}<h2>Übungsfortschritt</h2><select id="statEx" onchange="statDetail(this.value)"><option value="">Übung wählen …</option>${db.exercises.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select><div id="statDetail"></div><h2>Verlauf</h2><p class="muted tiny">Gewichtsveränderungen je Übung über das Statistik-Symbol im Training.</p>${db.history.map((w,i)=>({w,i})).reverse().map(({w,i})=>`<div class="card"><div class="row between"><div class="grow"><b>${esc(w.name)}</b><div class="muted tiny">${fmt(w.ended)} · ${daysAgo(w.ended)} ${w.autoEnded?"· Automatisch beendet":""}${w.recordExercises?` · <span style="color:#ffc46b">${TRS} ${w.recordExercises} Rekord${w.recordExercises===1?"":"e"}</span>`:""} · ${w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0)} Sätze</div></div>${btn('⋮','openHistoryOptions('+i+')','history-options')}</div></div>`).join('')||'<div class="card muted">Noch keine Trainingsdaten</div>'}`}
+
+/* ===== Einzelne Trainingseinheiten ansehen, bearbeiten und löschen ===== */
+let historyEdit=null;
+const historyDuration=w=>Number.isFinite(+w.activeDurationMs)?Math.max(0,+w.activeDurationMs):Math.max(0,new Date(w.ended)-new Date(w.started));
+const historyDurationLabel=w=>Math.round(historyDuration(w)/60000)+' Min.';
+function openHistoryOptions(i){
+ const w=db.history[i];if(!w)return;
+ const total=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
+ modal('<h2>Trainingsdetails</h2><div class="card"><b>'+esc(w.name)+'</b><p>'+fmt(w.ended)+' · '+historyDurationLabel(w)+' · '+total+' Sätze</p>'+(w.autoEnded?'<small>Automatisch beendet</small>':'')+'</div>'+w.exercises.map(e=>'<div class="card"><h3>'+esc(ex(e.id)?.name||'Übung')+'</h3>'+historyTable(e.sets.filter(s=>s.done))+'</div>').join('')+'<div class="actions">'+btn('Bearbeiten','editHistory('+i+')','primary')+btn('Training löschen','deleteHistory('+i+')','danger')+btn('Schließen','closeModal()')+'</div>');
+}
+function localDateTime(iso){
+ const d=new Date(iso);if(!Number.isFinite(d.getTime()))return '';
+ const pad=n=>String(n).padStart(2,'0');
+ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}
+function editHistory(i){
+ if(!db.history[i])return;
+ historyEdit={index:i,data:JSON.parse(JSON.stringify(db.history[i]))};renderHistoryEditor();
+}
+function renderHistoryEditor(){
+ if(!historyEdit)return;
+ const w=historyEdit.data;
+ const body='<h2>Training bearbeiten</h2><p class="muted tiny">Änderungen werden erst beim Speichern übernommen.</p>'+
+ '<label>Trainingsname</label><input aria-label="Trainingsname" value="'+esc(w.name)+'" onchange="historyEditField(\'name\',this.value)">'+
+ '<label>Ende (Datum / Uhrzeit)</label><input type="datetime-local" aria-label="Trainingsdatum" value="'+localDateTime(w.ended)+'" onchange="historyEditField(\'ended\',this.value)">'+
+ '<label>Aktive Trainingsdauer (Minuten)</label><input type="number" min="0" step="1" aria-label="Trainingsdauer" value="'+Math.round(historyDuration(w)/60000)+'" onchange="historyEditField(\'duration\',this.value)">'+
+ w.exercises.map((e,i)=>'<div class="card"><h3>'+esc(ex(e.id)?.name||'Übung')+'</h3><div class="setlabels"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small><small>OK</small></div>'+
+ e.sets.map((set,j)=>'<div class="sets"><small>'+(j+1)+'</small><input type="number" min="0" step="0.25" inputmode="decimal" aria-label="Gewicht Satz '+(j+1)+'" value="'+(+set.weight||0)+'" onchange="historyEditSet('+i+','+j+',\'weight\',this.value)"><input type="number" min="0" step="1" inputmode="numeric" aria-label="Wiederholungen Satz '+(j+1)+'" value="'+(+set.reps||0)+'" onchange="historyEditSet('+i+','+j+',\'reps\',this.value)"><input type="checkbox" aria-label="Satz '+(j+1)+' abgeschlossen" '+(set.done?'checked':'')+' onchange="historyEditSet('+i+','+j+',\'done\',this.checked)" style="width:25px;height:25px;margin:auto"></div>').join('')+
+ '<div class="actions">'+btn('+ Satz','historyEditAddSet('+i+')')+btn('- Satz','historyEditRemoveSet('+i+')','danger')+btn('Übung entfernen','historyEditRemoveExercise('+i+')','danger')+'</div></div>').join('')+
+ '<div class="card"><label>Übung ergänzen</label><select id="historyAddEx">'+exOptions()+'</select>'+btn('+ Übung hinzufügen','historyEditAddExercise()')+'</div>'+
+ '<div class="actions">'+btn('Speichern','saveHistoryEdit()','primary')+btn('Abbrechen','cancelHistoryEdit()')+'</div>';
+ const dialog=document.getElementById('modal');
+ if(dialog.open){dialog.innerHTML=body;dialog.scrollTop=0}else modal(body);
+}
+function historyEditField(field,value){
+ if(!historyEdit)return;
+ const w=historyEdit.data;
+ if(field==='name'){w.name=value;return}
+ if(field==='ended'){
+  const t=new Date(value).getTime();if(!Number.isFinite(t))return;
+  const delta=t-new Date(w.ended).getTime();w.ended=new Date(t).toISOString();
+  if(Number.isFinite(new Date(w.started).getTime()))w.started=new Date(new Date(w.started).getTime()+delta).toISOString();
+ }
+ if(field==='duration'){const v=Number(value);if(Number.isFinite(v)&&v>=0)w.activeDurationMs=Math.round(v*60000)}
+}
+function historyEditSet(i,j,field,value){
+ const set=historyEdit?.data.exercises[i]?.sets[j];if(!set)return;
+ if(field==='done'){set.done=!!value;if(!set.done)delete set.pr;return}
+ const n=Number(String(value).replace(',','.'));if(!Number.isFinite(n)||n<0)return;
+ set[field]=field==='reps'?Math.floor(n):Math.round(n*100)/100;
+}
+function historyEditAddSet(i){
+ const e=historyEdit?.data.exercises[i];if(!e)return;
+ const last=e.sets.at(-1)||{weight:0,reps:10};
+ e.sets.push({weight:last.weight,reps:last.reps,done:true,doneAt:null});renderHistoryEditor();
+}
+function historyEditRemoveSet(i){
+ const e=historyEdit?.data.exercises[i];if(!e||!e.sets.length)return;
+ e.sets.pop();renderHistoryEditor();
+}
+function historyEditRemoveExercise(i){
+ if(!historyEdit?.data.exercises[i]||!confirm('Diese Übung aus dem gespeicherten Training entfernen?'))return;
+ historyEdit.data.exercises.splice(i,1);renderHistoryEditor();
+}
+function historyEditAddExercise(){
+ if(!historyEdit)return;
+ const id=document.getElementById('historyAddEx')?.value;if(!ex(id))return;
+ historyEdit.data.exercises.push({id,key:uid(),sets:[{weight:0,reps:10,done:true,doneAt:null}]});renderHistoryEditor();
+}
+function recalculateHistoryRecords(){
+ db.history.sort((a,b)=>new Date(a.ended)-new Date(b.ended));
+ const past=[];for(const w of db.history){markRecords(w,past);past.push(w)}
+}
+function markHistoryChanged(){db.backup??={at:null,count:0,snooze:0};db.backup.dirty=true}
+function saveHistoryEdit(){
+ if(!historyEdit)return;
+ const {index,data}=historyEdit;if(!db.history[index])return cancelHistoryEdit();
+ data.name=String(data.name||'').trim();
+ if(!data.name)return alert('Bitte einen Trainingsnamen eingeben.');
+ if(!Number.isFinite(new Date(data.ended).getTime()))return alert('Ungültiges Trainingsdatum.');
+ if(!Number.isFinite(+data.activeDurationMs)||+data.activeDurationMs<0)return alert('Ungültige Trainingsdauer.');
+ if(!data.exercises.every(e=>e.sets.every(s=>Number.isFinite(+s.weight)&&+s.weight>=0&&Number.isInteger(+s.reps)&&+s.reps>=0)))return alert('Bitte Satzwerte überprüfen.');
+ db.history[index]=data;recalculateHistoryRecords();markHistoryChanged();save();
+ historyEdit=null;closeModal();render();
+}
+function cancelHistoryEdit(){historyEdit=null;closeModal()}
+function deleteHistory(i){
+ const w=db.history[i];if(!w)return;
+ if(!confirm('Training „'+w.name+'“ vom '+fmt(w.ended)+' endgültig löschen? Die Wiederherstellung ist nur über ein Backup möglich.'))return;
+ db.history.splice(i,1);recalculateHistoryRecords();markHistoryChanged();save();
+ historyEdit=null;closeModal();render();
+}
+
 function statDetail(id){let a=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(s=>s.done)})));document.getElementById('statDetail').innerHTML=recordsCard(id)+(a.length?a.sort((x,y)=>new Date(y.date)-new Date(x.date)).map(x=>`<div class="card"><b>${fmt(x.date)} · ${daysAgo(x.date)}</b>${historyTable(x.sets)}</div>`).join(''):'<p class="muted">Noch keine Werte für diese Übung.</p>')}
 function settings(){return `<h2>Einstellungen & Sicherung</h2><div class="card"><label>Standard-Pausenzeit in Sekunden</label><input type="number" min="0" value="${db.rest}" onchange="db.rest=Math.max(0,+this.value);save()"><p class="muted tiny">Der Pausentimer startet nach dem Abhaken eines Satzes.</p></div><div class="card"><h3>Datensicherung</h3><p class="muted">Alle Daten liegen lokal auf diesem Gerät. Nach jeweils 10 Trainings erinnert dich Eisenbieger an eine Sicherung. Die Backup-Datei brauchst du auch für einen Handywechsel: auf dem neuen Gerät einfach „Backup importieren“.</p><p class="tiny" style="color:${backupDue()?'#ffd978':'var(--muted)'}">${backupStatus()}</p><div class="actions">${btn('Backup exportieren','exportData()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / Cloud','shareBackup()'):''}<button onclick="document.getElementById('importFile').click()">Backup importieren</button></div><input id="importFile" type="file" accept=".json,application/json" class="hide" onchange="importData(this)"></div><div class="card"><h3>App installieren</h3>${isStandalone()?'<p class="muted">Eisenbieger läuft bereits als App.</p>':deferredInstall?`<p class="muted">Eisenbieger als App auf den Startbildschirm legen.</p><div class="actions">${btn('Installieren','installApp()','primary')}</div>`:'<p class="muted">Chrome-Menü (⋮) → „App installieren“ oder „Zum Startbildschirm hinzufügen“. Das geht nur, wenn die Seite über https geöffnet wurde, nicht direkt als Datei.</p>'}</div><div class="card"><h3>Hinweis</h3><p class="muted">Eisenbieger arbeitet offline. Alle Daten bleiben lokal auf diesem Gerät, es gibt kein Konto und keinen Server.</p></div><div class="card"><h3>Trainingsdaten</h3><p class="muted tiny">Löscht den gesamten Verlauf. Pläne und Übungen bleiben erhalten.</p><div class="actions">${btn("Verlauf löschen","resetHistory()","danger")}</div></div>`}
 function newPlan(c){modal(`<h2>Neuer Trainingsplan</h2><label>Name</label><input id="pn" placeholder="z. B. Plan 2 – Variation"><label>Kategorie</label><select id="pc">${CATS.map(x=>`<option ${x===(c||CATS[0])?'selected':''}>${x}</option>`).join('')}</select><p>${btn('Erstellen',"createPlan()",'primary')}</p>`)}
@@ -566,14 +659,14 @@ function prRows(e,i,w){const R=computeSetRecords(e.id,e.sets,db.history);return 
 /* ===== Sicherung ===== */
 const BACKUP_EVERY=10;
 const sinceBackup=()=>db.history.length-(db.backup?.count||0);
-const backupDue=()=>sinceBackup()>=BACKUP_EVERY;
+const backupDue=()=>!!db.backup?.dirty||sinceBackup()>=BACKUP_EVERY;
 function backupStatus(){return db.backup?.at?`Letzte Sicherung: ${fmt(db.backup.at)} · seitdem ${sinceBackup()} Training${sinceBackup()===1?'':'e'}`:`Noch keine Sicherung · ${db.history.length} Training${db.history.length===1?'':'e'} gespeichert`}
 function backupBanner(){return backupDue()?`<div class="banner"><b>Datensicherung fällig</b><p>Seit der letzten Sicherung hast du ${sinceBackup()} Trainings gespeichert.</p>${btn('Jetzt sichern','backupNow()','primary')}</div>`:''}
-function markBackup(){db.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};save()}
+function markBackup(){db.backup={at:new Date().toISOString(),count:db.history.length,snooze:0,dirty:false};save()}
 const backupName=()=>'eisenbieger-backup-'+new Date().toISOString().slice(0,10)+'.json';
 // A download request alone cannot prove that the user retained the file.
 // Export a snapshot with the new backup metadata, then require user confirmation.
-function backupSnapshot(){const data=JSON.parse(JSON.stringify(db));data.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};return JSON.stringify(data,null,2)}
+function backupSnapshot(){const data=JSON.parse(JSON.stringify(db));data.backup={at:new Date().toISOString(),count:db.history.length,snooze:0,dirty:false};return JSON.stringify(data,null,2)}
 function exportData(){
  const blob=new Blob([backupSnapshot()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
  try{
