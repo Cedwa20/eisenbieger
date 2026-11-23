@@ -2,7 +2,10 @@
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0e0c12"><title>Eisenbieger</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Eisenbieger"><meta name="application-name" content="Eisenbieger">
 <style>
 :root{color-scheme:dark;--bg:#0e0c12;--panel:#2b2733;--panel2:#363042;--btn:#3d374a;--line:#17141c;--ink:#050408;--hl:#4b4559;--sh:#1b1822;--iron:#7d7a8c;--text:#e8e0cf;--muted:#9d96a9;--accent:#ff9a2e;--blood:#c0262f;--bone:#e6dcc3;--frame:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink);--bevel:inset 2px 2px 0 0 var(--hl),inset -2px -2px 0 0 var(--sh);--redbev:inset 2px 2px 0 0 #e2535b,inset -2px -2px 0 0 #6b1319;--goldfr:0 -2px 0 0 #8a5412,0 2px 0 0 #8a5412,-2px 0 0 0 #8a5412,2px 0 0 0 #8a5412,0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink)}
-*{box-sizing:border-box;image-rendering:pixelated}
+*{box-sizing:border-box}
+/* Kleine Pixelgrafiken scharf, Schriften und Vektor-Symbole ohne globale Rasterung. */
+.thumb img,.bigimg img{image-rendering:pixelated}
+.ic,.brk,.torch svg{shape-rendering:crispEdges}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:21px/1.12 'VT323','Courier New',monospace}
 h1,h2,h3{font-family:'Jacquard 12','Times New Roman',serif;font-weight:400;color:var(--bone)}
@@ -329,14 +332,15 @@ const BLANK='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICT
 const QUOTES=['Wir machen den Sport nicht, weil wir gesund werden wollen, sondern weil wir Muskeln wollen.','Schweres Gewicht, hohes Volumen – Muskelwachstum!','Es gibt keinen Grund, Übungen permanent zu ändern.','Wir machen immer noch Bodybuilding, weil wir es gerne machen.','Weil ich\u2019s kann!','Wer scheiß Arme hat, sieht scheiße aus.','Wenn du Scheiße frisst, wirst du halt scheiße aussehen.'];
 function dailyQuote(){if(!QUOTES.length)return '';const d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);return '<div class="quote"><div>\u201E'+esc(QUOTES[n%QUOTES.length])+'\u201C</div><small>\u2013 Markus R\u00FChl</small></div>'}
 function brandHeader(){return `<div class="brand">${BRICK}<div class="glow"></div><div class="torch l">${TORCH}</div><div class="torch r">${TORCH}</div><div class="txt"><h1>Eisenbieger</h1><small>Dein Trainings-Tracker</small></div></div><div class="recbar"><span>Heutige Empfehlung: <b>${esc(recommendedCategory())}</b></span><span class="pill">Bereit</span></div>${tab==='home'?dailyQuote():''}`}
-/* Übungsbilder: Vektor-Skizze -> kleines Raster -> harte Pixel in Kerker-Farben */
+/* Übungsbilder: Vektor-Skizze -> feineres Raster -> klare Pixel in Kerker-Farben. */
+// 1.5x mehr Pixel je Bildachse, bei unveränderten Anzeigegrößen.
 const PXPAL=[[230,220,195],[125,122,140],[174,178,189],[90,86,104],[53,48,66],[23,20,28]];
 const pxCache={},pxPending={};
 const pxKey=(e,big)=>e.id+(big?'B':'S');
 function pxUrl(e,big){const k=pxKey(e,big);if(pxCache[k])return pxCache[k];if(!pxPending[k]){pxPending[k]=1;pixelize(e,big).then(u=>{pxCache[k]=u;document.querySelectorAll('img[data-px="'+k+'"]').forEach(i=>{i.src=u})}).catch(()=>{pxPending[k]=0})}return ''}
 async function rasterLayer(svg,w,h){const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));try{const img=new Image();img.src=url;await img.decode();const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);return x.getImageData(0,0,w,h).data}finally{URL.revokeObjectURL(url)}}
 async function pixelize(e,big){
- const w=big?96:48,h=big?68:34;
+ const w=big?144:72,h=big?102:51;
  const [eq,gh,ac]=await Promise.all([rasterLayer(exSvg(e,'eq'),w,h),rasterLayer(exSvg(e,'ghost'),w,h),rasterLayer(exSvg(e,'act'),w,h)]);
  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const out=x.createImageData(w,h),o=out.data;
  const put=(i,r,g,b,dim)=>{let best=0,bd=1e9;for(let k=0;k<PXPAL.length;k++){const q=PXPAL[k],d=(r-q[0])**2+(g-q[1])**2+(b-q[2])**2;if(d<bd){bd=d;best=k}}const q=PXPAL[best],m=dim?0.5:1;o[i]=q[0]*m;o[i+1]=q[1]*m;o[i+2]=q[2]*m;o[i+3]=255};
@@ -349,7 +353,7 @@ function exSvg(e,layer){
  pxMode=px;
  let eq='<line x1="6" y1="93" x2="154" y2="93" stroke="#35303f" stroke-width="'+(px?3:1.5)+'"/>'+(EQ[f.eq]||'');
  if(px)eq=eq.replace(/stroke-width="[^"]*"([^>]*?)stroke-width="([^"]*)"/g,'$1 stroke-width="$2"');
- if(px)eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.9).toFixed(1)+'"');
+ if(px)eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.65).toFixed(1)+'"');
  if(f.cab){const[cx,cy]=f.cab;eq+=`<path d="M${cx} ${cy}L${a[8]} ${a[9]}" stroke="#7d7a8c" stroke-width="${px?2.6:1.4}" stroke-dasharray="${px?'7 4':'3 2'}" fill="none"/><circle cx="${cx}" cy="${cy}" r="${px?5:3.5}" fill="#7d7a8c"/>`}
  const gh=drawFig(b,e.imp,f.mir,px?1:.32),ac=drawFig(a,e.imp,f.mir,1);
  pxMode=false;
@@ -367,14 +371,14 @@ function frameSvg(e,t,layer){
  pxMode=true;
  let eq='<line x1="6" y1="93" x2="154" y2="93" stroke="#35303f" stroke-width="3"/>'+(EQ[f.eq]||'');
  eq=eq.replace(/stroke-width="[^"]*"([^>]*?)stroke-width="([^"]*)"/g,'$1 stroke-width="$2"');
- eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.9).toFixed(1)+'"');
+ eq=eq.replace(/stroke-width="(\d+(?:\.\d+)?)"/g,(m,w)=>'stroke-width="'+(+w*1.65).toFixed(1)+'"');
  if(f.cab){const[cx,cy]=f.cab;eq+=`<path d="M${cx} ${cy}L${n[8]} ${n[9]}" stroke="#7d7a8c" stroke-width="2.6" stroke-dasharray="7 4" fill="none"/><circle cx="${cx}" cy="${cy}" r="5" fill="#7d7a8c"/>`}
  const ac=drawFig(n,e.imp,f.mir,1);pxMode=false;
  const wrap=c=>'<svg viewBox="0 -12 160 112" width="160" height="112" xmlns="http://www.w3.org/2000/svg">'+c+'</svg>';
  return layer==='eq'?wrap(eq):wrap(ac);
 }
 async function pixelFrame(e,t){
- const w=96,h=68;
+ const w=144,h=102;
  const [eq,ac]=await Promise.all([rasterLayer(frameSvg(e,t,'eq'),w,h),rasterLayer(frameSvg(e,t,'act'),w,h)]);
  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');const out=x.createImageData(w,h),o=out.data;
  const put=(i,r,g,b)=>{let best=0,bd=1e9;for(let k=0;k<PXPAL.length;k++){const q=PXPAL[k],d=(r-q[0])**2+(g-q[1])**2+(b-q[2])**2;if(d<bd){bd=d;best=k}}const q=PXPAL[best];o[i]=q[0];o[i+1]=q[1];o[i+2]=q[2];o[i+3]=255};
