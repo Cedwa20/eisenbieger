@@ -406,7 +406,7 @@ function syncCatalog(){for(const c of catEx()){let e=db.exercises.find(x=>x.id==
 let db;try{db=JSON.parse(localStorage.getItem('stackTrackV1'))||seed()}catch{db=seed()}
 try{localStorage.removeItem('meinGymDemoV7')}catch{}
 let tab='home',filter='',category=CATS[0],timer=null, muscleFilter='Alle';
-function normalizeDb(){db.exercises??=[];syncCatalog();db.plans??=[];db.history??=[];db.rest=Number.isFinite(+db.rest)?+db.rest:90;db.backup??={at:null,count:0,snooze:0};db.exercises.forEach(e=>{if(!e.step)e.step=2.5});if(db.active){db.active.timers??=[];db.active.pausedMs??=0;db.active.lastActivityAt=Date.now()}}
+function normalizeDb(){db.exercises??=[];syncCatalog();db.plans??=[];db.history??=[];db.rest=Number.isFinite(+db.rest)?+db.rest:90;db.backup??={at:null,count:0,snooze:0};db.exercises.forEach(e=>{if(!e.step)e.step=2.5});if(db.active){db.active.timers??=[];db.active.pausedMs??=0;db.active.lastActivityAt=Number.isFinite(+db.active.lastActivityAt)&&+db.active.lastActivityAt>0?+db.active.lastActivityAt:new Date(db.active.started).getTime()||Date.now()}}
 normalizeDb();
 
 let saveWarned=false;
@@ -531,7 +531,7 @@ function lastSessionSummary(id){const sessions=db.history.flatMap(w=>w.exercises
 function resetHistory(){if(confirm('Gesamten Trainingsverlauf und ein laufendes Training löschen? Pläne und Übungen bleiben erhalten.')){db.history=[];db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
 function workout(){let w=db.active;if(!w)return `<h2>Kein aktives Training</h2>${btn('Pläne öffnen',"go('home')")}`;return `${w.pausedAt?'<div class="banner">Workout pausiert – die Satzpausen laufen weiter.</div>':''}<p class="muted tiny">Übungen wechseln, verschieben oder ergänzen. Die Trainingsdauer zählt Unterbrechungen nicht mit.</p>${w.exercises.map((e,i)=>`<div class="card"><div class="row between"><div class="row">${thumb(e.id)}<div><h3>${esc(ex(e.id)?.name||'Übung')}</h3><small>${esc(ex(e.id)?.muscle||'')} · Schritt ${ex(e.id)?.step||2.5} kg</small></div></div><div class="actions">${btn(ICONS.stat,`showExerciseHistory('${e.id}')`)}${btn(ICONS.up,`moveWorkout(${i},-1)`)}${btn(ICONS.down,`moveWorkout(${i},1)`)}</div></div><div class="setlabels"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small><small>OK</small></div>${prRows(e,i,w)}<div class="actions">${btn('+ Satz',`addSet(${i})`)}${btn('- Satz',`removeSet(${i})`)}</div>${lastSessionSummary(e.id)}<div class="row between" style="margin-top:10px"><span class="muted tiny">${e.sets.filter(s=>s.done).length}/${e.sets.length} Sätze erledigt</span><span class="workout-bottom">${btn(ICONS.x,`removeWorkout(${i})`,"danger")}</span></div></div>`).join('')}<div class="card">${btn('+ Übung hinzufügen','chooseWorkoutExercise()','primary')}</div><div class="card">${btn('Training abschließen','finishWorkout()','primary')} ${btn('Verwerfen','discardWorkout()','danger')}</div>`}
 function adjust(i,j,k,dir){if(db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],step=k==='weight'?(ex(db.active.exercises[i].id)?.step||2.5):1;s[k]=Math.max(0,Math.round(((Number(s[k])||0)+dir*step)*100)/100);save();render()}
-function setValue(i,j,k,v){db.active.exercises[i].sets[j][k]=Math.max(0,Number(v)||0);save()}
+function setValue(i,j,k,v){if(!db.active||db.active.pausedAt)return;db.active.exercises[i].sets[j][k]=Math.max(0,Number(v)||0);save()}
 function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render()}
 function addSet(i){let a=db.active.exercises[i].sets,last=a.at(-1)||{weight:0,reps:10};a.push({weight:last.weight,reps:last.reps,done:false,doneAt:null});save();render()}
 function removeSet(i){let a=db.active.exercises[i].sets;if(a.length>1)a.pop();save();render()}
@@ -544,7 +544,6 @@ function finishWorkout(){if(!db.active)return;if(!confirm('Training abschließen
 function discardWorkout(){if(confirm('Training wirklich verwerfen?')){db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
 function modal(html){let d=document.getElementById('modal');d.innerHTML=html;d.scrollTop=0;d.showModal();d.scrollTop=0;requestAnimationFrame(()=>{d.scrollTop=0;const first=d.querySelector('h2');if(first)first.scrollIntoView({block:'start',behavior:'instant'});d.scrollTop=0})}
 function closeModal(){document.getElementById('modal').close()}
-function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='stacktrack-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function importData(input){let f=input.files[0];if(!f)return;try{let data=JSON.parse(await f.text());if(!Array.isArray(data.exercises)||!Array.isArray(data.plans)||!Array.isArray(data.history))throw Error('Ungültige Datei');if(confirm('Alle aktuellen Daten durch das Backup ersetzen?')){db=data;normalizeDb();save();render()}}catch(e){alert('Backup konnte nicht gelesen werden: '+e.message)}}
 /* ===== Rekorde ===== */
 const e1rmOf=(w,r)=>{w=+w||0;r=+r||0;return (w<=0||r<=0)?0:(r===1?w:w*(1+r/30))};
@@ -568,9 +567,27 @@ function backupStatus(){return db.backup?.at?`Letzte Sicherung: ${fmt(db.backup.
 function backupBanner(){return backupDue()?`<div class="banner"><b>Datensicherung fällig</b><p>Seit der letzten Sicherung hast du ${sinceBackup()} Trainings gespeichert.</p>${btn('Jetzt sichern','backupNow()','primary')}</div>`:''}
 function markBackup(){db.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};save()}
 const backupName=()=>'eisenbieger-backup-'+new Date().toISOString().slice(0,10)+'.json';
-function exportData(){markBackup();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=backupName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
-async function shareBackup(){const old=db.backup;markBackup();const file=new File([JSON.stringify(db,null,2)],backupName(),{type:'application/json'});try{if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:'Eisenbieger Backup'});if(document.getElementById('modal').open)closeModal();render();return}}catch(e){if(e&&e.name==='AbortError'){db.backup=old;save();return}}db.backup=old;exportData();if(document.getElementById('modal').open)closeModal();render()}
-function backupNow(){exportData();if(document.getElementById('modal').open)closeModal();render()}
+// A download request alone cannot prove that the user retained the file.
+// Export a snapshot with the new backup metadata, then require user confirmation.
+function backupSnapshot(){const data=JSON.parse(JSON.stringify(db));data.backup={at:new Date().toISOString(),count:db.history.length,snooze:0};return JSON.stringify(data,null,2)}
+function exportData(){
+ const blob=new Blob([backupSnapshot()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ try{
+  a.href=url;a.download=backupName();document.body.appendChild(a);a.click();
+ }catch(e){alert('Backup-Download konnte nicht gestartet werden: '+e.message);return false}
+ finally{a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+ if(confirm('Wurde die Backup-Datei erfolgreich auf deinem Gerät gespeichert? Nur dann wird die Sicherung als abgeschlossen markiert.')){markBackup();return true}
+ return false;
+}
+async function shareBackup(){
+ const file=new File([backupSnapshot()],backupName(),{type:'application/json'});
+ if(navigator.canShare?.({files:[file]})){
+  try{await navigator.share({files:[file],title:'Eisenbieger Backup'});markBackup();if(document.getElementById('modal').open)closeModal();render();return}
+  catch(e){if(e?.name==='AbortError')return;console.warn('Teilen fehlgeschlagen, Download wird angeboten:',e)}
+ }
+ backupNow();
+}
+function backupNow(){const ok=exportData();if(ok&&document.getElementById('modal').open)closeModal();render()}
 function snoozeBackup(){db.backup??={at:null,count:0};db.backup.snooze=db.history.length+3;save();closeModal()}
 function afterWorkout(w){const recs=[];w.exercises.forEach(e=>{const sets=e.sets.filter(s=>s.done&&s.pr?.length);if(!sets.length)return;const best=sets.reduce((a,b)=>((+b.weight||0)>(+a.weight||0)||((+b.weight||0)===(+a.weight||0)&&(+b.reps||0)>(+a.reps||0)))?b:a);const codes=[...new Set(sets.flatMap(s=>s.pr))];recs.push(`<div class="prrow"><span>${esc(ex(e.id)?.name||'Übung')}</span><span class="tiny muted">${prLabel(codes,best)} · ${num(best.weight)} kg × ${best.reps}</span></div>`)});const due=backupDue()&&db.history.length>=(db.backup?.snooze||0);if(!recs.length&&!due)return;modal(`<h2>Training gespeichert</h2>${recs.length?`<div class="card prcard"><b>${TR} Neue Rekorde bei ${recs.length} Übung${recs.length===1?'':'en'}</b>${recs.join('')}</div>`:''}${due?`<div class="card"><b>Zeit für eine Sicherung</b><p class="muted">Seit der letzten Sicherung sind ${sinceBackup()} Trainings dazugekommen. Die Datei hilft dir auch beim Handywechsel.</p><div class="actions">${btn('Jetzt sichern','backupNow()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / in Cloud speichern','shareBackup()'):''}${btn('Später','snoozeBackup()')}</div></div>`:''}${due?'':`<p>${btn('Schließen','closeModal()')}</p>`}`)}
 /* ===== Installation ===== */
@@ -582,7 +599,7 @@ const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigat
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{navigator.storage?.persist?.()}catch{}
 
-function ROWTPL(e,i,j,s,w){return `<div class="sets"><small>${j+1}</small><div class="stepper"><button onclick="adjust(${i},${j},'weight',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="decimal" min="0" aria-label="Gewicht Satz ${j+1}" value="${s.weight}" onchange="setValue(${i},${j},'weight',this.value)"><button onclick="adjust(${i},${j},'weight',1)" ${w.pausedAt?'disabled':''}>+</button></div><div class="stepper"><button onclick="adjust(${i},${j},'reps',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="numeric" min="0" aria-label="Wiederholungen Satz ${j+1}" value="${s.reps}" onchange="setValue(${i},${j},'reps',this.value)"><button onclick="adjust(${i},${j},'reps',1)" ${w.pausedAt?'disabled':''}>+</button></div><button class="${s.done?'done':''}" onclick="toggleSet(${i},${j})" ${w.pausedAt?'disabled':''}>${s.done?CHK:''}</button></div>`}
+function ROWTPL(e,i,j,s,w){return `<div class="sets"><small>${j+1}</small><div class="stepper"><button onclick="adjust(${i},${j},'weight',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="decimal" min="0" aria-label="Gewicht Satz ${j+1}" value="${s.weight}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'weight',this.value)"><button onclick="adjust(${i},${j},'weight',1)" ${w.pausedAt?'disabled':''}>+</button></div><div class="stepper"><button onclick="adjust(${i},${j},'reps',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="numeric" min="0" aria-label="Wiederholungen Satz ${j+1}" value="${s.reps}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'reps',this.value)"><button onclick="adjust(${i},${j},'reps',1)" ${w.pausedAt?'disabled':''}>+</button></div><button class="${s.done?'done':''}" onclick="toggleSet(${i},${j})" ${w.pausedAt?'disabled':''}>${s.done?CHK:''}</button></div>`}
 
 setInterval(()=>{if(checkInactivity())return;updateTimers();},500);
 checkInactivity();
