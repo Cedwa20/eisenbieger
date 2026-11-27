@@ -4,6 +4,10 @@ Alle wichtigen Änderungen an der Fitness-App werden hier dokumentiert. Die Vers
 
 Die produktive App liegt unter [Eisenbieger](https://cedwa20.github.io/eisenbieger/), die getrennte Testversion unter [Eisenbieger DEV](https://cedwa20.github.io/eisenbieger/dev/).
 
+## [Unreleased – DEV] – 2026-11-27
+- Retro-Animationen für Gewichts- und Wiederholungsänderungen, Satzabschluss, persönliche Rekorde und vollständige Übungen.
+- DEV-Quellstand auf gh-pages/dev veröffentlicht; Cache-Version v24. Smartphone-Test und Produktivfreigabe ausstehend.
+
 ## [1.3.0] – 2026-11-23
 ### Neu
 - Im Menü **Statistik → Verlauf** besitzt jedes gespeicherte Training einen eigenen Options-Button (`⋮`).
