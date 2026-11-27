@@ -25,7 +25,7 @@ header:has(.training-head){position:sticky;top:0;padding:10px 12px;background:va
 .brand .torch{position:absolute;top:18px}.brand .torch.l{left:14px}.brand .torch.r{right:14px}
 .torch svg{display:block;animation:fl .8s steps(1) infinite}
 @keyframes fl{0%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-@media(prefers-reduced-motion:reduce){.torch svg{animation:none}}
+html[data-motion=off] .torch svg{animation:none}
 .brand .txt{position:absolute;left:0;right:0;top:8px;text-align:center}
 .brand small{display:block;color:#c9c0ac;text-shadow:2px 2px 0 #000;font-size:19px;margin-top:-2px}
 .recbar{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:38px;padding:3px 16px;background:#17141c;box-shadow:inset 0 -2px 0 0 var(--ink);color:var(--muted)}
@@ -118,7 +118,7 @@ details.card summary{cursor:pointer}
 @keyframes eb-down{35%{transform:translateY(2px);color:var(--muted)}}
 @keyframes eb-set{0%{background:#668f4540;outline:2px solid #9ac76b}100%{background:transparent;outline:2px solid transparent}}
 @keyframes eb-check{35%{transform:scale(1.13);filter:brightness(1.5)}100%{transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.fx-up,.fx-down,.fx-set,.fx-set>button.done{animation:none}}
+html[data-motion=off] :is(.fx-up,.fx-down,.fx-set,.fx-set>button.done){animation:none}
  
 /* Retro-Erfolgseffekte: lokale, nicht interaktive Overlays. */
 .sets[data-workout-set]{position:relative}
@@ -132,7 +132,7 @@ details.card summary{cursor:pointer}
 @keyframes eb-exercise{0%,25%{outline:2px solid #9ac76b;outline-offset:2px}100%{outline:2px solid transparent;outline-offset:2px}}
 .fx-complete-label{position:absolute;z-index:2;left:50%;bottom:8px;transform:translateX(-50%);white-space:nowrap;max-width:95%;padding:5px 9px;background:#1b2820;color:#d4efad;border:2px solid #9ac76b;box-shadow:3px 3px 0 #050408;pointer-events:none;font-size:18px;animation:eb-complete-label 1.2s steps(12,end) both}
 @keyframes eb-complete-label{0%{opacity:0;transform:translate(-50%,6px)}15%,70%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
-@media(prefers-reduced-motion:reduce){.fx-burst,.fx-complete-label{display:none}.fx-exercise,.fx-record{animation:none}}
+html[data-motion=off] :is(.fx-burst,.fx-complete-label){display:none}html[data-motion=off] :is(.fx-exercise,.fx-record){animation:none}
 </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jacquard+12&family=VT323&display=swap" rel="stylesheet"></head><body><header></header><main id="app"></main><nav id="nav"></nav><dialog id="modal" tabindex="-1"></dialog>
 <script>
 const CATS=['Brust / Bizeps','Rücken / Trizeps','Bauch / Beine'];
@@ -412,7 +412,7 @@ async function pixelFrame(e,t){
 function stopAnim(){animToken++;if(animTimer){clearInterval(animTimer);animTimer=null}}
 async function startAnim(e){
  stopAnim();const tok=animToken;
- if(!e||!FAM[e.fam]||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!e||!FAM[e.fam]||!animationsEnabled())return;
  try{
   if(!animCache[e.id])animCache[e.id]=await Promise.all([0,.2,.4,.6,.8,1].map(t=>pixelFrame(e,t)));
   if(tok!==animToken)return;
@@ -432,10 +432,12 @@ function thumb(id,sm){
 function showImg(id){const e=ex(id);if(!e)return;const img=FAM[e.fam]?`<img id="animImg" data-px="${pxKey(e,1)}" alt="${esc(e.name)}" src="${pxUrl(e,1)||BLANK}">`:'';modal(`<h2>${esc(e.name)}</h2><div class="bigimg">${img}</div><p class="muted tiny">${esc(e.muscle)} · ${esc(e.equipment)}<br>Das Bild zeigt den Bewegungsablauf von der Start- zur Endposition. Die Skizzen dienen der Orientierung.</p>${dTxt(id)}<p>${btn('Schließen','closeModal()')}</p>`);startAnim(e)}
 function exOptions(){const g={};db.exercises.forEach(e=>(g[e.muscle]??=[]).push(e));return Object.keys(g).map(m=>`<optgroup label="${esc(m)}">${g[m].map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</optgroup>`).join('')}
 function syncCatalog(){for(const c of catEx()){let e=db.exercises.find(x=>x.id===c.id);if(!e)db.exercises.push(c);else{e.fam??=c.fam;e.imp??=c.imp}}}
+const APP_VERSION='1.4.0';
+const APP_CHANNEL='DEV';
 let db;try{db=JSON.parse(localStorage.getItem('eisenbiegerDevelopmentV1'))||seed()}catch{db=seed()}
 try{localStorage.removeItem('meinGymDemoV7')}catch{}
 let tab='home',filter='',category=CATS[0],timer=null, muscleFilter='Alle';
-function normalizeDb(){db.exercises??=[];syncCatalog();db.plans??=[];db.history??=[];db.rest=Number.isFinite(+db.rest)?+db.rest:90;db.backup??={at:null,count:0,snooze:0};db.exercises.forEach(e=>{if(!e.step)e.step=2.5});if(db.active){db.active.timers??=[];db.active.pausedMs??=0;db.active.lastActivityAt=Number.isFinite(+db.active.lastActivityAt)&&+db.active.lastActivityAt>0?+db.active.lastActivityAt:new Date(db.active.started).getTime()||Date.now()}}
+function normalizeDb(){if(!['system','on','off'].includes(db.animationMode))db.animationMode='system';db.exercises??=[];syncCatalog();db.plans??=[];db.history??=[];db.rest=Number.isFinite(+db.rest)?+db.rest:90;db.backup??={at:null,count:0,snooze:0};db.exercises.forEach(e=>{if(!e.step)e.step=2.5});if(db.active){db.active.timers??=[];db.active.pausedMs??=0;db.active.lastActivityAt=Number.isFinite(+db.active.lastActivityAt)&&+db.active.lastActivityAt>0?+db.active.lastActivityAt:new Date(db.active.started).getTime()||Date.now()}}
 normalizeDb();
 
 let saveWarned=false;
@@ -513,7 +515,10 @@ document.addEventListener('pointerdown',registerActivity,{passive:true});
 document.addEventListener('keydown',registerActivity);
 document.addEventListener('input',registerActivity);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkInactivity()});
+function animationsEnabled(){return db.animationMode==='on'||(db.animationMode!=='off'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)}
+function setAnimationMode(v){if(!['system','on','off'].includes(v))return;db.animationMode=v;save();render()}
 function render(){
+document.documentElement.dataset.motion=animationsEnabled()?'on':'off';
 
 document.querySelector('header').innerHTML=db.active?trainingHeader():brandHeader();
 document.getElementById('nav').innerHTML=[['home','Start'],...(db.active?[['workout','Training']]:[]),['plans','Pläne'],['library','Übungen'],['stats','Statistik'],['settings','Mehr']].map(([id,name])=>`<button class="${tab===id?'active':''}" onclick="go('${id}')">${ICONS[id]}<span>${name}</span></button>`).join('');
@@ -630,7 +635,7 @@ function deleteHistory(i){
 }
 
 function statDetail(id){let a=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(s=>s.done)})));document.getElementById('statDetail').innerHTML=recordsCard(id)+(a.length?a.sort((x,y)=>new Date(y.date)-new Date(x.date)).map(x=>`<div class="card"><b>${fmt(x.date)} · ${daysAgo(x.date)}</b>${historyTable(x.sets)}</div>`).join(''):'<p class="muted">Noch keine Werte für diese Übung.</p>')}
-function settings(){return `<h2>Einstellungen & Sicherung</h2><div class="card"><label>Standard-Pausenzeit in Sekunden</label><input type="number" min="0" value="${db.rest}" onchange="db.rest=Math.max(0,+this.value);save()"><p class="muted tiny">Der Pausentimer startet nach dem Abhaken eines Satzes.</p></div><div class="card"><h3>Datensicherung</h3><p class="muted">Alle Daten liegen lokal auf diesem Gerät. Nach jeweils 10 Trainings erinnert dich Eisenbieger an eine Sicherung. Die Backup-Datei brauchst du auch für einen Handywechsel: auf dem neuen Gerät einfach „Backup importieren“.</p><p class="tiny" style="color:${backupDue()?'#ffd978':'var(--muted)'}">${backupStatus()}</p><div class="actions">${btn('Backup exportieren','exportData()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / Cloud','shareBackup()'):''}<button onclick="document.getElementById('importFile').click()">Backup importieren</button></div><input id="importFile" type="file" accept=".json,application/json" class="hide" onchange="importData(this)"></div><div class="card"><h3>App installieren</h3>${isStandalone()?'<p class="muted">Eisenbieger läuft bereits als App.</p>':deferredInstall?`<p class="muted">Eisenbieger als App auf den Startbildschirm legen.</p><div class="actions">${btn('Installieren','installApp()','primary')}</div>`:'<p class="muted">Chrome-Menü (⋮) → „App installieren“ oder „Zum Startbildschirm hinzufügen“. Das geht nur, wenn die Seite über https geöffnet wurde, nicht direkt als Datei.</p>'}</div><div class="card"><h3>Hinweis</h3><p class="muted">Eisenbieger arbeitet offline. Alle Daten bleiben lokal auf diesem Gerät, es gibt kein Konto und keinen Server.</p></div><div class="card"><h3>Trainingsdaten</h3><p class="muted tiny">Löscht den gesamten Verlauf. Pläne und Übungen bleiben erhalten.</p><div class="actions">${btn("Verlauf löschen","resetHistory()","danger")}</div></div>`}
+function settings(){return `<h2>Einstellungen & Sicherung</h2><div class="card"><label>Standard-Pausenzeit in Sekunden</label><input type="number" min="0" value="${db.rest}" onchange="db.rest=Math.max(0,+this.value);save()"><p class="muted tiny">Der Pausentimer startet nach dem Abhaken eines Satzes.</p></div><div class="card"><h3>Animationen</h3><label for="animationMode">Bewegungseffekte</label><select id="animationMode" onchange="setAnimationMode(this.value)"><option value="system" ${db.animationMode==='system'?'selected':''}>Systemstandard</option><option value="on" ${db.animationMode==='on'?'selected':''}>Immer aktiviert</option><option value="off" ${db.animationMode==='off'?'selected':''}>Deaktiviert</option></select><p class="muted tiny">Aktuell: ${animationsEnabled()?'aktiv':'deaktiviert'}. Systemstandard berücksichtigt die Bewegungseinstellungen des Geräts.</p></div><div class="card"><h3>App-Version</h3><p>Eisenbieger ${APP_VERSION} · ${APP_CHANNEL}</p><p class="muted tiny" id="updateStatus" role="status">Für Updates ist eine Internetverbindung erforderlich.</p><div class="actions"><button id="updateButton" onclick="checkAppUpdate()">Auf Updates prüfen</button></div></div><div class="card"><h3>Datensicherung</h3><p class="muted">Alle Daten liegen lokal auf diesem Gerät. Nach jeweils 10 Trainings erinnert dich Eisenbieger an eine Sicherung. Die Backup-Datei brauchst du auch für einen Handywechsel: auf dem neuen Gerät einfach „Backup importieren“.</p><p class="tiny" style="color:${backupDue()?'#ffd978':'var(--muted)'}">${backupStatus()}</p><div class="actions">${btn('Backup exportieren','exportData()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / Cloud','shareBackup()'):''}<button onclick="document.getElementById('importFile').click()">Backup importieren</button></div><input id="importFile" type="file" accept=".json,application/json" class="hide" onchange="importData(this)"></div><div class="card"><h3>App installieren</h3>${isStandalone()?'<p class="muted">Eisenbieger läuft bereits als App.</p>':deferredInstall?`<p class="muted">Eisenbieger als App auf den Startbildschirm legen.</p><div class="actions">${btn('Installieren','installApp()','primary')}</div>`:'<p class="muted">Chrome-Menü (⋮) → „App installieren“ oder „Zum Startbildschirm hinzufügen“. Das geht nur, wenn die Seite über https geöffnet wurde, nicht direkt als Datei.</p>'}</div><div class="card"><h3>Hinweis</h3><p class="muted">Eisenbieger arbeitet offline. Alle Daten bleiben lokal auf diesem Gerät, es gibt kein Konto und keinen Server.</p></div><div class="card"><h3>Trainingsdaten</h3><p class="muted tiny">Löscht den gesamten Verlauf. Pläne und Übungen bleiben erhalten.</p><div class="actions">${btn("Verlauf löschen","resetHistory()","danger")}</div></div>`}
 function newPlan(c){modal(`<h2>Neuer Trainingsplan</h2><label>Name</label><input id="pn" placeholder="z. B. Plan 2 – Variation"><label>Kategorie</label><select id="pc">${CATS.map(x=>`<option ${x===(c||CATS[0])?'selected':''}>${x}</option>`).join('')}</select><p>${btn('Erstellen',"createPlan()",'primary')}</p>`)}
 function createPlan(){let name=document.getElementById('pn').value.trim();if(!name)return alert('Bitte Namen eingeben');let id=uid();db.plans.push({id,name,category:document.getElementById('pc').value,exercises:[]});save();closeModal();editPlan(id)}
 function editPlan(id){let p=db.plans.find(p=>p.id===id);if(!p)return;modal(`<h2>Plan bearbeiten</h2><label>Name</label><input id="pn" value="${esc(p.name)}"><label>Kategorie</label><select id="pc">${CATS.map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}</select><h3 style="margin-top:18px">Übungen</h3><div id="planItems">${p.exercises.map((eid,i)=>`<div class="row between" style="padding:6px 0"><span>${esc(ex(eid)?.name||'?')}</span>${btn(ICONS.up,`movePlan('${id}',${i},-1)`)}${btn(ICONS.down,`movePlan('${id}',${i},1)`)}${btn('×',`removePlanEx('${id}',${i})`,'danger')}</div>`).join('')}</div><label>Übung hinzufügen</label><select id="addEx">${exOptions()}</select><p>${btn('+ Hinzufügen',`addPlanEx('${id}')`)}</p><div class="actions">${btn('Speichern',`savePlan('${id}')`,'primary')}${btn('Schließen','closeModal()')}</div>`)}
@@ -653,14 +658,14 @@ function lastSessionSummary(id){const sessions=db.history.flatMap(w=>w.exercises
 function resetHistory(){if(confirm('Gesamten Trainingsverlauf und ein laufendes Training löschen? Pläne und Übungen bleiben erhalten.')){db.history=[];db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
 function workout(){let w=db.active;if(!w)return `<h2>Kein aktives Training</h2>${btn('Pläne öffnen',"go('home')")}`;return `${w.pausedAt?'<div class="banner">Workout pausiert – die Satzpausen laufen weiter.</div>':''}<p class="muted tiny">Übungen wechseln, verschieben oder ergänzen. Die Trainingsdauer zählt Unterbrechungen nicht mit.</p>${w.exercises.map((e,i)=>`<div class="card"><div class="row between"><div class="row">${thumb(e.id)}<div><h3>${esc(ex(e.id)?.name||'Übung')}</h3><small>${esc(ex(e.id)?.muscle||'')} · Schritt ${ex(e.id)?.step||2.5} kg</small></div></div><div class="actions">${btn(ICONS.stat,`showExerciseHistory('${e.id}')`)}${btn(ICONS.up,`moveWorkout(${i},-1)`)}${btn(ICONS.down,`moveWorkout(${i},1)`)}</div></div><div class="setlabels"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small><small>OK</small></div>${prRows(e,i,w)}<div class="actions">${btn('+ Satz',`addSet(${i})`)}${btn('- Satz',`removeSet(${i})`)}</div>${lastSessionSummary(e.id)}<div class="row between" style="margin-top:10px"><span class="muted tiny">${e.sets.filter(s=>s.done).length}/${e.sets.length} Sätze erledigt</span><span class="workout-bottom">${btn(ICONS.x,`removeWorkout(${i})`,"danger")}</span></div></div>`).join('')}<div class="card">${btn('+ Übung hinzufügen','chooseWorkoutExercise()','primary')}</div><div class="card">${btn('Training abschließen','finishWorkout()','primary')} ${btn('Verwerfen','discardWorkout()','danger')}</div>`}
 function setFeedback(i,j,k,dir){
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!animationsEnabled())return;
  const row=document.querySelector('[data-workout-set="'+i+'-'+j+'"]');if(!row)return;
  const target=k==='done'?row:row.querySelectorAll('.stepper input')[k==='weight'?0:1];if(!target)return;
  const cls=k==='done'?'fx-set':dir>0?'fx-up':'fx-down';target.classList.remove('fx-set','fx-up','fx-down');void target.offsetWidth;target.classList.add(cls);
- target.addEventListener('animationend',e=>{if(e.target===target)target.classList.remove(cls)},{once:false});
+ const cleanup=e=>{if(e.target!==target)return;target.classList.remove(cls);target.removeEventListener('animationend',cleanup)};target.addEventListener('animationend',cleanup);
 }
 function celebrateSet(i,j){
- if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ if(!animationsEnabled())return;
  const e=db.active?.exercises[i],row=document.querySelector('[data-workout-set="'+i+'-'+j+'"]');if(!e||!row)return;
  const record=computeSetRecords(e.id,e.sets,db.history)[j].length>0;
  const complete=e.sets.length>0&&e.sets.every(s=>s.done);
@@ -736,6 +741,28 @@ async function shareBackup(){
 function backupNow(){const ok=exportData();if(ok&&document.getElementById('modal').open)closeModal();render()}
 function snoozeBackup(){db.backup??={at:null,count:0};db.backup.snooze=db.history.length+3;save();closeModal()}
 function afterWorkout(w){const recs=[];w.exercises.forEach(e=>{const sets=e.sets.filter(s=>s.done&&s.pr?.length);if(!sets.length)return;const best=sets.reduce((a,b)=>((+b.weight||0)>(+a.weight||0)||((+b.weight||0)===(+a.weight||0)&&(+b.reps||0)>(+a.reps||0)))?b:a);const codes=[...new Set(sets.flatMap(s=>s.pr))];recs.push(`<div class="prrow"><span>${esc(ex(e.id)?.name||'Übung')}</span><span class="tiny muted">${prLabel(codes,best)} · ${num(best.weight)} kg × ${best.reps}</span></div>`)});const due=backupDue()&&db.history.length>=(db.backup?.snooze||0);if(!recs.length&&!due)return;modal(`<h2>Training gespeichert</h2>${recs.length?`<div class="card prcard"><b>${TR} Neue Rekorde bei ${recs.length} Übung${recs.length===1?'':'en'}</b>${recs.join('')}</div>`:''}${due?`<div class="card"><b>Zeit für eine Sicherung</b><p class="muted">Seit der letzten Sicherung sind ${sinceBackup()} Trainings dazugekommen. Die Datei hilft dir auch beim Handywechsel.</p><div class="actions">${btn('Jetzt sichern','backupNow()','primary')}${navigator.canShare&&navigator.share?btn('Teilen / in Cloud speichern','shareBackup()'):''}${btn('Später','snoozeBackup()')}</div></div>`:''}${due?'':`<p>${btn('Schließen','closeModal()')}</p>`}`)}
+/* ===== App-Aktualisierung ===== */
+let checkingUpdate=false;
+async function checkAppUpdate(){
+ if(checkingUpdate)return;
+ if(db.active){alert('Bitte beende zuerst das laufende Training.');return}
+ checkingUpdate=true;
+ const status=t=>{const el=document.getElementById('updateStatus');if(el)el.textContent=t};
+ const button=document.getElementById('updateButton');if(button)button.disabled=true;
+ try{
+  status('Suche nach neuer Version …');
+  const url=new URL('index.html',location.href);url.searchParams.set('_update',Date.now());
+  const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw Error('HTTP '+res.status);
+  const html=await res.text(),version=html.match(/const APP_VERSION='([^']+)'/)?.[1];
+  if(!version)throw Error('Versionsinformation fehlt');
+  if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration(location.href);if(reg)await reg.update()}
+  if(version===APP_VERSION){status('Version '+APP_VERSION+' ist aktuell.');return}
+  status('Version '+version+' verfügbar.');
+  if(!db.active&&confirm('Version '+version+' laden? Deine gespeicherten Daten bleiben erhalten.')){location.replace(url.href)}
+ }catch(e){status('Update-Prüfung fehlgeschlagen. Bitte Internetverbindung prüfen und erneut versuchen.')}
+ finally{checkingUpdate=false;if(button)button.disabled=false}
+}
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change',()=>{if(db.animationMode==='system'){document.documentElement.dataset.motion=animationsEnabled()?'on':'off';if(tab==='settings')render()}});
 /* ===== Installation ===== */
 let deferredInstall=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(tab==='settings')render()});
