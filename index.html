@@ -119,6 +119,20 @@ details.card summary{cursor:pointer}
 @keyframes eb-set{0%{background:#668f4540;outline:2px solid #9ac76b}100%{background:transparent;outline:2px solid transparent}}
 @keyframes eb-check{35%{transform:scale(1.13);filter:brightness(1.5)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.fx-up,.fx-down,.fx-set,.fx-set>button.done{animation:none}}
+ 
+/* Retro-Erfolgseffekte: lokale, nicht interaktive Overlays. */
+.sets[data-workout-set]{position:relative}
+.fx-burst{position:absolute;right:22px;top:50%;width:0;height:0;pointer-events:none;z-index:2}
+.fx-burst i{position:absolute;width:5px;height:5px;background:#ffd35a;box-shadow:2px 2px 0 #b97920;opacity:0;animation:eb-spark .72s steps(9,end) var(--delay) both}
+.fx-burst i:nth-child(3n){width:3px;height:3px;background:#fff0ac}
+@keyframes eb-spark{0%{opacity:1;transform:translate(0,0)}60%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.fx-record{animation:eb-record .85s steps(8,end)}
+@keyframes eb-record{0%,40%{color:#fff0ac;text-shadow:0 0 7px #ff9a2e}100%{text-shadow:none}}
+.fx-exercise{animation:eb-exercise 1.15s steps(10,end)}
+@keyframes eb-exercise{0%,25%{outline:2px solid #9ac76b;outline-offset:2px}100%{outline:2px solid transparent;outline-offset:2px}}
+.fx-complete-label{position:absolute;z-index:2;left:50%;bottom:8px;transform:translateX(-50%);white-space:nowrap;max-width:95%;padding:5px 9px;background:#1b2820;color:#d4efad;border:2px solid #9ac76b;box-shadow:3px 3px 0 #050408;pointer-events:none;font-size:18px;animation:eb-complete-label 1.2s steps(12,end) both}
+@keyframes eb-complete-label{0%{opacity:0;transform:translate(-50%,6px)}15%,70%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+@media(prefers-reduced-motion:reduce){.fx-burst,.fx-complete-label{display:none}.fx-exercise,.fx-record{animation:none}}
 </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jacquard+12&family=VT323&display=swap" rel="stylesheet"></head><body><header></header><main id="app"></main><nav id="nav"></nav><dialog id="modal" tabindex="-1"></dialog>
 <script>
 const CATS=['Brust / Bizeps','Rücken / Trizeps','Bauch / Beine'];
@@ -645,9 +659,26 @@ function setFeedback(i,j,k,dir){
  const cls=k==='done'?'fx-set':dir>0?'fx-up':'fx-down';target.classList.remove('fx-set','fx-up','fx-down');void target.offsetWidth;target.classList.add(cls);
  target.addEventListener('animationend',e=>{if(e.target===target)target.classList.remove(cls)},{once:false});
 }
+function celebrateSet(i,j){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const e=db.active?.exercises[i],row=document.querySelector('[data-workout-set="'+i+'-'+j+'"]');if(!e||!row)return;
+ const record=computeSetRecords(e.id,e.sets,db.history)[j].length>0;
+ const complete=e.sets.length>0&&e.sets.every(s=>s.done);
+ if(record){
+  const burst=document.createElement('span');burst.className='fx-burst';burst.setAttribute('aria-hidden','true');
+  for(let n=0;n<12;n++){const p=document.createElement('i'),a=n*Math.PI/6,d=22+(n%3)*10;p.style.setProperty('--dx',Math.round(Math.cos(a)*d)+'px');p.style.setProperty('--dy',Math.round(Math.sin(a)*d)+'px');p.style.setProperty('--delay',(n%3)*35+'ms');burst.appendChild(p)}
+  row.appendChild(burst);setTimeout(()=>burst.remove(),1000);
+  const label=row.nextElementSibling;if(label?.classList.contains('prline')){label.classList.add('fx-record');setTimeout(()=>label.classList.remove('fx-record'),900)}
+ }
+ if(complete){
+  const card=row.closest('.card');if(!card)return;
+  card.classList.add('fx-exercise');const badge=document.createElement('span');badge.className='fx-complete-label';badge.textContent='ÜBUNG ABGESCHLOSSEN';badge.setAttribute('aria-hidden','true');card.appendChild(badge);
+  setTimeout(()=>{badge.remove();card.classList.remove('fx-exercise')},1250);
+ }
+}
 function adjust(i,j,k,dir){if(db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],step=k==='weight'?(ex(db.active.exercises[i].id)?.step||2.5):1;let old=Number(s[k])||0;s[k]=Math.max(0,Math.round((old+dir*step)*100)/100);save();render();if(s[k]!==old)setFeedback(i,j,k,dir)}
 function setValue(i,j,k,v){if(!db.active||db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],old=Number(s[k])||0;s[k]=Math.max(0,Number(v)||0);save();if(s[k]!==old)setFeedback(i,j,k,s[k]>old?1:-1)}
-function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render();if(s.done)setFeedback(i,j,'done',1)}
+function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render();if(s.done){setFeedback(i,j,'done',1);celebrateSet(i,j)}}
 function addSet(i){let a=db.active.exercises[i].sets,last=a.at(-1)||{weight:0,reps:10};a.push({weight:last.weight,reps:last.reps,done:false,doneAt:null});save();render()}
 function removeSet(i){let a=db.active.exercises[i].sets;if(a.length>1)a.pop();save();render()}
 function moveWorkout(i,d){let a=db.active.exercises,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
