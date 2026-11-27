@@ -15,7 +15,7 @@ Siehe CHANGELOG.md (zuletzt dokumentierte Version 1.3.0).
 - [x] Grüner Satzeffekt mit pulsierendem Haken.
 - [x] Goldene Pixelfunken bei persönlichen Rekorden.
 - [x] Erfolgsanimation bei vollständigem Abschluss einer Übung.
-- [ ] DEV-Veröffentlichung der Animationen überprüfen bzw. aktualisieren.
+- [x] Animationen in gh-pages/dev veröffentlicht; DEV-Cache auf v24 erhöht. Smartphone-Test und öffentliche Auslieferung noch zu bestätigen.
 - [ ] Animationen auf Android testen (auch schnelle Eingaben, gleichzeitiger Rekord und Übungsabschluss, reduzierte Bewegung).
 - [ ] Nach Nutzerfreigabe in Haupt-App übernehmen und CHANGELOG.md aktualisieren.
 
