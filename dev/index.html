@@ -108,6 +108,31 @@ details.card summary{cursor:pointer}
 .ic{display:inline-block;vertical-align:-3px}
 .quote{padding:10px 16px 12px;background:#120f17;box-shadow:inset 0 -2px 0 0 var(--ink);color:var(--bone);font-size:22px;line-height:1.1}.quote small{display:block;margin-top:4px;color:var(--accent);font-size:18px}
 .desc{margin:10px 0 4px;border-top:2px solid var(--line);padding-top:8px}.desc p{margin:8px 0;font-size:20px;line-height:1.2}.desc b{color:var(--accent)}
+
+/* Kurzes Retro-Feedback, ohne Layoutverschiebung. */
+.fx-up{animation:eb-up .26s steps(5,end)}
+.fx-down{animation:eb-down .20s steps(4,end)}
+.fx-set{animation:eb-set .48s steps(8,end)}
+.fx-set>button.done{animation:eb-check .32s steps(5,end)}
+@keyframes eb-up{0%{transform:translateY(0)}35%{transform:translateY(-3px);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}100%{transform:translateY(0)}}
+@keyframes eb-down{35%{transform:translateY(2px);color:var(--muted)}}
+@keyframes eb-set{0%{background:#668f4540;outline:2px solid #9ac76b}100%{background:transparent;outline:2px solid transparent}}
+@keyframes eb-check{35%{transform:scale(1.13);filter:brightness(1.5)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.fx-up,.fx-down,.fx-set,.fx-set>button.done{animation:none}}
+ 
+/* Retro-Erfolgseffekte: lokale, nicht interaktive Overlays. */
+.sets[data-workout-set]{position:relative}
+.fx-burst{position:absolute;right:22px;top:50%;width:0;height:0;pointer-events:none;z-index:2}
+.fx-burst i{position:absolute;width:5px;height:5px;background:#ffd35a;box-shadow:2px 2px 0 #b97920;opacity:0;animation:eb-spark .72s steps(9,end) var(--delay) both}
+.fx-burst i:nth-child(3n){width:3px;height:3px;background:#fff0ac}
+@keyframes eb-spark{0%{opacity:1;transform:translate(0,0)}60%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.5)}}
+.fx-record{animation:eb-record .85s steps(8,end)}
+@keyframes eb-record{0%,40%{color:#fff0ac;text-shadow:0 0 7px #ff9a2e}100%{text-shadow:none}}
+.fx-exercise{animation:eb-exercise 1.15s steps(10,end)}
+@keyframes eb-exercise{0%,25%{outline:2px solid #9ac76b;outline-offset:2px}100%{outline:2px solid transparent;outline-offset:2px}}
+.fx-complete-label{position:absolute;z-index:2;left:50%;bottom:8px;transform:translateX(-50%);white-space:nowrap;max-width:95%;padding:5px 9px;background:#1b2820;color:#d4efad;border:2px solid #9ac76b;box-shadow:3px 3px 0 #050408;pointer-events:none;font-size:18px;animation:eb-complete-label 1.2s steps(12,end) both}
+@keyframes eb-complete-label{0%{opacity:0;transform:translate(-50%,6px)}15%,70%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+@media(prefers-reduced-motion:reduce){.fx-burst,.fx-complete-label{display:none}.fx-exercise,.fx-record{animation:none}}
 </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jacquard+12&family=VT323&display=swap" rel="stylesheet"></head><body><header></header><main id="app"></main><nav id="nav"></nav><dialog id="modal" tabindex="-1"></dialog>
 <script>
 const CATS=['Brust / Bizeps','Rücken / Trizeps','Bauch / Beine'];
@@ -627,9 +652,33 @@ function updateTimers(){let w=db.active;if(!w)return;let d=document.getElementBy
 function lastSessionSummary(id){const sessions=db.history.flatMap(w=>w.exercises.filter(e=>e.id===id).map(e=>({date:w.ended,sets:e.sets.filter(x=>x.done),demo:!!w.demo}))).filter(x=>x.sets.length).sort((a,b)=>new Date(b.date)-new Date(a.date));if(!sessions.length)return `<div class="last-session">Letztes Training: Noch keine Aufzeichnung</div>`;const last=sessions[0];return `<div class="last-session"><b>Letztes Training:</b> ${fmt(last.date)} · ${daysAgo(last.date)}<div class="last-history"><div class="last-history-head"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small></div>${last.sets.map((x,i)=>`<div class="last-history-row"><span>${i+1}</span><span>${Number(x.weight).toLocaleString('de-DE')} kg</span><span>${x.reps}</span></div>`).join('')}</div></div>`}
 function resetHistory(){if(confirm('Gesamten Trainingsverlauf und ein laufendes Training löschen? Pläne und Übungen bleiben erhalten.')){db.history=[];db.active=null;releaseScreenWakeLock();timer=null;save();go('home')}}
 function workout(){let w=db.active;if(!w)return `<h2>Kein aktives Training</h2>${btn('Pläne öffnen',"go('home')")}`;return `${w.pausedAt?'<div class="banner">Workout pausiert – die Satzpausen laufen weiter.</div>':''}<p class="muted tiny">Übungen wechseln, verschieben oder ergänzen. Die Trainingsdauer zählt Unterbrechungen nicht mit.</p>${w.exercises.map((e,i)=>`<div class="card"><div class="row between"><div class="row">${thumb(e.id)}<div><h3>${esc(ex(e.id)?.name||'Übung')}</h3><small>${esc(ex(e.id)?.muscle||'')} · Schritt ${ex(e.id)?.step||2.5} kg</small></div></div><div class="actions">${btn(ICONS.stat,`showExerciseHistory('${e.id}')`)}${btn(ICONS.up,`moveWorkout(${i},-1)`)}${btn(ICONS.down,`moveWorkout(${i},1)`)}</div></div><div class="setlabels"><small>Satz</small><small>Gewicht (kg)</small><small>Wdh.</small><small>OK</small></div>${prRows(e,i,w)}<div class="actions">${btn('+ Satz',`addSet(${i})`)}${btn('- Satz',`removeSet(${i})`)}</div>${lastSessionSummary(e.id)}<div class="row between" style="margin-top:10px"><span class="muted tiny">${e.sets.filter(s=>s.done).length}/${e.sets.length} Sätze erledigt</span><span class="workout-bottom">${btn(ICONS.x,`removeWorkout(${i})`,"danger")}</span></div></div>`).join('')}<div class="card">${btn('+ Übung hinzufügen','chooseWorkoutExercise()','primary')}</div><div class="card">${btn('Training abschließen','finishWorkout()','primary')} ${btn('Verwerfen','discardWorkout()','danger')}</div>`}
-function adjust(i,j,k,dir){if(db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],step=k==='weight'?(ex(db.active.exercises[i].id)?.step||2.5):1;s[k]=Math.max(0,Math.round(((Number(s[k])||0)+dir*step)*100)/100);save();render()}
-function setValue(i,j,k,v){if(!db.active||db.active.pausedAt)return;db.active.exercises[i].sets[j][k]=Math.max(0,Number(v)||0);save()}
-function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render()}
+function setFeedback(i,j,k,dir){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const row=document.querySelector('[data-workout-set="'+i+'-'+j+'"]');if(!row)return;
+ const target=k==='done'?row:row.querySelectorAll('.stepper input')[k==='weight'?0:1];if(!target)return;
+ const cls=k==='done'?'fx-set':dir>0?'fx-up':'fx-down';target.classList.remove('fx-set','fx-up','fx-down');void target.offsetWidth;target.classList.add(cls);
+ target.addEventListener('animationend',e=>{if(e.target===target)target.classList.remove(cls)},{once:false});
+}
+function celebrateSet(i,j){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const e=db.active?.exercises[i],row=document.querySelector('[data-workout-set="'+i+'-'+j+'"]');if(!e||!row)return;
+ const record=computeSetRecords(e.id,e.sets,db.history)[j].length>0;
+ const complete=e.sets.length>0&&e.sets.every(s=>s.done);
+ if(record){
+  const burst=document.createElement('span');burst.className='fx-burst';burst.setAttribute('aria-hidden','true');
+  for(let n=0;n<12;n++){const p=document.createElement('i'),a=n*Math.PI/6,d=22+(n%3)*10;p.style.setProperty('--dx',Math.round(Math.cos(a)*d)+'px');p.style.setProperty('--dy',Math.round(Math.sin(a)*d)+'px');p.style.setProperty('--delay',(n%3)*35+'ms');burst.appendChild(p)}
+  row.appendChild(burst);setTimeout(()=>burst.remove(),1000);
+  const label=row.nextElementSibling;if(label?.classList.contains('prline')){label.classList.add('fx-record');setTimeout(()=>label.classList.remove('fx-record'),900)}
+ }
+ if(complete){
+  const card=row.closest('.card');if(!card)return;
+  card.classList.add('fx-exercise');const badge=document.createElement('span');badge.className='fx-complete-label';badge.textContent='ÜBUNG ABGESCHLOSSEN';badge.setAttribute('aria-hidden','true');card.appendChild(badge);
+  setTimeout(()=>{badge.remove();card.classList.remove('fx-exercise')},1250);
+ }
+}
+function adjust(i,j,k,dir){if(db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],step=k==='weight'?(ex(db.active.exercises[i].id)?.step||2.5):1;let old=Number(s[k])||0;s[k]=Math.max(0,Math.round((old+dir*step)*100)/100);save();render();if(s[k]!==old)setFeedback(i,j,k,dir)}
+function setValue(i,j,k,v){if(!db.active||db.active.pausedAt)return;let s=db.active.exercises[i].sets[j],old=Number(s[k])||0;s[k]=Math.max(0,Number(v)||0);save();if(s[k]!==old)setFeedback(i,j,k,s[k]>old?1:-1)}
+function toggleSet(i,j){let s=db.active.exercises[i].sets[j];s.done=!s.done;s.doneAt=s.done?Date.now():null;if(s.done){let id=db.active.exercises[i].id;db.active.timers??=[];db.active.timers=db.active.timers.filter(t=>t.id!==id);db.active.timers.push({id,end:Date.now()+db.rest*1000,duration:db.rest*1000});db.active.timers=db.active.timers.slice(-2)}save();render();if(s.done){setFeedback(i,j,'done',1);celebrateSet(i,j)}}
 function addSet(i){let a=db.active.exercises[i].sets,last=a.at(-1)||{weight:0,reps:10};a.push({weight:last.weight,reps:last.reps,done:false,doneAt:null});save();render()}
 function removeSet(i){let a=db.active.exercises[i].sets;if(a.length>1)a.pop();save();render()}
 function moveWorkout(i,d){let a=db.active.exercises,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render()}
@@ -696,7 +745,7 @@ const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigat
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{navigator.storage?.persist?.()}catch{}
 
-function ROWTPL(e,i,j,s,w){return `<div class="sets"><small>${j+1}</small><div class="stepper"><button onclick="adjust(${i},${j},'weight',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="decimal" min="0" aria-label="Gewicht Satz ${j+1}" value="${s.weight}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'weight',this.value)"><button onclick="adjust(${i},${j},'weight',1)" ${w.pausedAt?'disabled':''}>+</button></div><div class="stepper"><button onclick="adjust(${i},${j},'reps',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="numeric" min="0" aria-label="Wiederholungen Satz ${j+1}" value="${s.reps}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'reps',this.value)"><button onclick="adjust(${i},${j},'reps',1)" ${w.pausedAt?'disabled':''}>+</button></div><button class="${s.done?'done':''}" onclick="toggleSet(${i},${j})" ${w.pausedAt?'disabled':''}>${s.done?CHK:''}</button></div>`}
+function ROWTPL(e,i,j,s,w){return `<div class="sets" data-workout-set="${i}-${j}"><small>${j+1}</small><div class="stepper"><button onclick="adjust(${i},${j},'weight',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="decimal" min="0" aria-label="Gewicht Satz ${j+1}" value="${s.weight}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'weight',this.value)"><button onclick="adjust(${i},${j},'weight',1)" ${w.pausedAt?'disabled':''}>+</button></div><div class="stepper"><button onclick="adjust(${i},${j},'reps',-1)" ${w.pausedAt?'disabled':''}>-</button><input type="number" inputmode="numeric" min="0" aria-label="Wiederholungen Satz ${j+1}" value="${s.reps}" ${w.pausedAt?'disabled':''} onchange="setValue(${i},${j},'reps',this.value)"><button onclick="adjust(${i},${j},'reps',1)" ${w.pausedAt?'disabled':''}>+</button></div><button class="${s.done?'done':''}" onclick="toggleSet(${i},${j})" ${w.pausedAt?'disabled':''}>${s.done?CHK:''}</button></div>`}
 
 setInterval(()=>{if(checkInactivity())return;updateTimers();},500);
 checkInactivity();
